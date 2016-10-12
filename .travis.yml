@@ -1,4 +1,16 @@
-sudo: false
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - kalakris-cmake
+    packages:
+    - gcc-4.9
+    - g++-4.9
+    - cmake
+    - valgrind
+
 language: python
 
 # To turn off cached miniconda, cython files and compiler cache comment out the
@@ -250,6 +262,8 @@ before_install:
   - source ci/travis_process_gbq_encryption.sh
   - echo $VIRTUAL_ENV
   - export PATH="$HOME/miniconda/bin:$PATH"
+  - export APT_ARGS="-y"
+  - sudo apt-get install ccache
   - df -h
   - date
   - pwd
@@ -272,6 +286,8 @@ install:
 before_script:
   - source activate pandas && pip install codecov
   - ci/install_db.sh
+  - # mysql -e 'create database pandas_nosetest;'
+  - # psql -c 'create database pandas_nosetest;' -U postgres
 
 script:
   - echo "script start"

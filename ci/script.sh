@@ -24,7 +24,7 @@ elif [ "$COVERAGE" ]; then
     nosetests --exe -A "$NOSE_ARGS" pandas --with-coverage --cover-package=pandas --cover-tests --with-xunit --xunit-file=/tmp/nosetests.xml
 else
     echo nosetests --exe -A "$NOSE_ARGS" pandas --doctest-tests --with-xunit --xunit-file=/tmp/nosetests.xml
-    nosetests --exe -A "$NOSE_ARGS" pandas --doctest-tests --with-xunit --xunit-file=/tmp/nosetests.xml
+    nosetests --exe -A "$NOSE_ARGS" pandas/internals --doctest-tests --with-xunit --xunit-file=/tmp/nosetests.xml
 fi
 
 RET="$?"
