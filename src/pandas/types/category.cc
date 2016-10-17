@@ -5,13 +5,10 @@
 
 namespace pandas {
 
-PyObject* CategoryArray::GetValue(size_t i) {
-  return NULL;
-}
-
-
-void CategoryArray::SetValue(size_t i, PyObject* val) {
-  return;
+std::string CategoryType::ToString() const {
+  std::stringstream s;
+  s << "category<" << category_type()->ToString() << ">";
+  return s.str();
 }
 
 } // namespace pandas

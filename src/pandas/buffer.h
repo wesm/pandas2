@@ -82,7 +82,10 @@ class PANDAS_EXPORT Buffer {
   // other buffer
   bool is_shared() const { return static_cast<bool>(parent_); }
 
-  const std::shared_ptr<Buffer> parent() const { return parent_; }
+  std::shared_ptr<Buffer> parent() const { return parent_; }
+
+  // Copy the indicated byte range into a newly-created buffer
+  Status Copy(int64_t start, int64_t nbytes, std::shared_ptr<Buffer>* out) const;
 
  protected:
   bool is_mutable_;
@@ -97,6 +100,11 @@ class PANDAS_EXPORT Buffer {
  private:
   DISALLOW_COPY_AND_ASSIGN(Buffer);
 };
+
+// Construct a view on passed buffer at the indicated offset and length. This
+// function cannot fail and does not error checking (except in debug builds)
+std::shared_ptr<Buffer> SliceBuffer(const std::shared_ptr<Buffer>& buffer, int64_t offset,
+    int64_t length);
 
 class PANDAS_EXPORT ResizableBuffer : public Buffer {
  public:

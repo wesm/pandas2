@@ -8,10 +8,10 @@
 #include <cstdint>
 #include <limits>
 
-#include "pandas/util/bit-util.h"
-#include "pandas/util/logging.h"
 #include "pandas/memory.h"
 #include "pandas/status.h"
+#include "pandas/util/bit-util.h"
+#include "pandas/util/logging.h"
 
 namespace pandas {
 
@@ -23,6 +23,30 @@ Buffer::Buffer(const std::shared_ptr<Buffer>& parent, int64_t offset, int64_t si
 }
 
 Buffer::~Buffer() {}
+
+Status Buffer::Copy(int64_t start, int64_t nbytes, std::shared_ptr<Buffer>* out) const {
+  // Sanity checks
+  PANDAS_DCHECK_LT(start, size_);
+  PANDAS_DCHECK_LE(nbytes, size_ - start);
+
+  auto new_buffer = std::make_shared<PoolBuffer>();
+  RETURN_NOT_OK(new_buffer->Resize(nbytes));
+
+  std::memcpy(new_buffer->mutable_data(), data() + start, nbytes);
+
+  *out = new_buffer;
+  return Status::OK();
+}
+
+std::shared_ptr<Buffer> SliceBuffer(const std::shared_ptr<Buffer>& buffer, int64_t offset,
+    int64_t length) {
+  PANDAS_DCHECK_LT(offset, buffer->size());
+  PANDAS_DCHECK_LE(length, buffer->size() - offset);
+  return std::make_shared<Buffer>(buffer, offset, length);
+}
+
+// ----------------------------------------------------------------------
+// Buffer that allocated memory from the central memory pool
 
 PoolBuffer::PoolBuffer(MemoryPool* pool) : ResizableBuffer(nullptr, 0) {
   if (pool == nullptr) { pool = default_memory_pool(); }

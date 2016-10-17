@@ -8,8 +8,7 @@
 #include <memory>
 
 #include "pandas/types/boolean.h"
-#include "pandas/types/integer.h"
-#include "pandas/types/floating.h"
+#include "pandas/types/numeric.h"
 #include "pandas/status.h"
 
 namespace pandas {

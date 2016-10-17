@@ -6,13 +6,11 @@
 
 #include "pandas/array.h"
 #include "pandas/dispatch.h"
-#include "pandas/types.h"
+#include "pandas/status.h"
+#include "pandas/type.h"
 
 #include "pandas/types/boolean.h"
 #include "pandas/types/category.h"
-#include "pandas/types/floating.h"
-#include "pandas/types/integer.h"
-
-#include "pandas/status.h"
+#include "pandas/types/numeric.h"
 
 #endif // PANDAS_API_H
