@@ -3,7 +3,7 @@
 
 #include "pandas/dispatch.h"
 
-#include "pandas/status.h"
+#include "pandas/common.h"
 
 namespace pandas {
 

@@ -9,9 +9,8 @@
 #include <string>
 
 #include "pandas/array.h"
+#include "pandas/common.h"
 #include "pandas/type.h"
-
-#include "pandas/status.h"
 
 namespace pandas {
 

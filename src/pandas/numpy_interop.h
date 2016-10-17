@@ -31,6 +31,7 @@
 #include <numpy/ufuncobject.h>
 
 #include "pandas/array.h"
+#include "pandas/common.h"
 #include "pandas/type.h"
 
 namespace pandas {
@@ -43,8 +44,6 @@ inline int import_numpy() {
 
   return 0;
 }
-
-class Status;
 
 Status numpy_type_num_to_pandas(int type_num, DataType::TypeId* pandas_type);
 

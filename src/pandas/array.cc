@@ -2,7 +2,7 @@
 // copyright holders
 
 #include "pandas/array.h"
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/type.h"
 #include "pandas/util/logging.h"
 

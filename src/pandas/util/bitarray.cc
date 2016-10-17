@@ -5,7 +5,7 @@
 
 #include <new>
 
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/util.h"
 
 namespace pandas {

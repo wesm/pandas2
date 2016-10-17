@@ -6,12 +6,10 @@
 #include "pandas/config.h"
 
 #include "pandas/array.h"
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/type.h"
 
 namespace pandas {
-
-class Buffer;
 
 class PANDAS_EXPORT NumericArray : public Array {
  public:

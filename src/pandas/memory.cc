@@ -9,14 +9,13 @@
 #include <mutex>
 #include <sstream>
 
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/util/logging.h"
 
 namespace pandas {
 
 namespace {
-// Allocate memory according to the alignment requirements for Pandas
-// (as of May 2016 64 bytes)
+
 Status AllocateAligned(int64_t size, uint8_t** out) {
   // TODO(emkornfield) find something compatible with windows
   constexpr size_t kAlignment = 64;
@@ -35,8 +34,6 @@ Status AllocateAligned(int64_t size, uint8_t** out) {
   return Status::OK();
 }
 }  // namespace
-
-MemoryPool::~MemoryPool() {}
 
 class InternalMemoryPool : public MemoryPool {
  public:

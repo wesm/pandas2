@@ -9,13 +9,11 @@
 #include <string>
 #include <vector>
 
+#include "pandas/common.h"
 #include "pandas/type.h"
 #include "pandas/util.h"
 
 namespace pandas {
-
-// Forward declarations
-class Status;
 
 // Base class for physical array data structures.
 class Array {

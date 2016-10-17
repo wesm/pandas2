@@ -7,8 +7,8 @@
 #include <Python.h>
 
 #include "pandas/array.h"
+#include "pandas/common.h"
 #include "pandas/numpy_interop.h"
-#include "pandas/status.h"
 #include "pandas/type.h"
 #include "pandas/util/bitarray.h"
 

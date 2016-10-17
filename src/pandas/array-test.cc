@@ -10,9 +10,8 @@
 #include "gtest/gtest.h"
 
 #include "pandas/array.h"
-#include "pandas/buffer.h"
+#include "pandas/common.h"
 #include "pandas/memory.h"
-#include "pandas/status.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
 #include "pandas/types/numeric.h"
