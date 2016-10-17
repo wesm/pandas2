@@ -31,18 +31,18 @@ class Status;
 class PANDAS_EXPORT Buffer {
  public:
   Buffer(uint8_t* data, int64_t size)
-    : is_mutable_(true),
-    mutable_data_(data),
-    data_(data),
-    size_(size),
-    capacity_(size) {}
+      : is_mutable_(true),
+        mutable_data_(data),
+        data_(data),
+        size_(size),
+        capacity_(size) {}
 
   Buffer(const uint8_t* data, int64_t size)
-    : is_mutable_(false),
-    mutable_data_(nullptr),
-    data_(data),
-    size_(size),
-    capacity_(size) {}
+      : is_mutable_(false),
+        mutable_data_(nullptr),
+        data_(data),
+        size_(size),
+        capacity_(size) {}
 
   virtual ~Buffer();
 
@@ -103,8 +103,8 @@ class PANDAS_EXPORT Buffer {
 
 // Construct a view on passed buffer at the indicated offset and length. This
 // function cannot fail and does not error checking (except in debug builds)
-std::shared_ptr<Buffer> SliceBuffer(const std::shared_ptr<Buffer>& buffer, int64_t offset,
-    int64_t length);
+std::shared_ptr<Buffer> SliceBuffer(
+    const std::shared_ptr<Buffer>& buffer, int64_t offset, int64_t length);
 
 class PANDAS_EXPORT ResizableBuffer : public Buffer {
  public:

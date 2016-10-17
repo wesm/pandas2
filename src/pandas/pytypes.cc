@@ -19,6 +19,6 @@ void init_natype(PyObject* na_type, PyObject* na_singleton) {
   NA = na_singleton;
 }
 
-} // namespace py
+}  // namespace py
 
-} // namespace pandas
+}  // namespace pandas

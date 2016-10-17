@@ -7,28 +7,25 @@
 
 #include <memory>
 
+#include "pandas/status.h"
 #include "pandas/types/boolean.h"
 #include "pandas/types/numeric.h"
-#include "pandas/status.h"
 
 namespace pandas {
 
-#define TYPE_MAP_CASE(NP_NAME, PD_NAME)         \
-  case NPY_##NP_NAME:                           \
-    *pandas_type = DataType::PD_NAME;           \
+#define TYPE_MAP_CASE(NP_NAME, PD_NAME) \
+  case NPY_##NP_NAME:                   \
+    *pandas_type = DataType::PD_NAME;   \
     break;
 
 template <int NPY_TYPE>
-struct NumPyTraits {
-};
+struct NumPyTraits {};
 
-
-#define NUMPY_TRAITS_DECL(NPY_TYPE, PandasArrayType)    \
-  template <>                                           \
-  struct NumPyTraits<NPY_TYPE> {                        \
-    typedef PandasArrayType ArrayType;                  \
+#define NUMPY_TRAITS_DECL(NPY_TYPE, PandasArrayType) \
+  template <>                                        \
+  struct NumPyTraits<NPY_TYPE> {                     \
+    typedef PandasArrayType ArrayType;               \
   }
-
 
 NUMPY_TRAITS_DECL(NPY_INT8, Int8Array);
 NUMPY_TRAITS_DECL(NPY_INT16, Int16Array);
@@ -42,7 +39,6 @@ NUMPY_TRAITS_DECL(NPY_BOOL, BooleanArray);
 NUMPY_TRAITS_DECL(NPY_FLOAT32, FloatArray);
 NUMPY_TRAITS_DECL(NPY_FLOAT64, DoubleArray);
 // NUMPY_TRAITS_DECL(NPY_OBJECT, PyObjectArray);
-
 
 Status numpy_type_num_to_pandas(int type_num, DataType::TypeId* pandas_type) {
   switch (type_num) {
@@ -64,7 +60,6 @@ Status numpy_type_num_to_pandas(int type_num, DataType::TypeId* pandas_type) {
   return Status::OK();
 }
 
-
 template <int NPY_TYPE>
 static Status convert_numpy_array(PyObject* arr, Array** out) {
   // typedef typename NumPyTraits<NPY_TYPE>::ArrayType ArrayType;
@@ -74,12 +69,10 @@ static Status convert_numpy_array(PyObject* arr, Array** out) {
   return Status::OK();
 }
 
-
-#define NUMPY_CONVERTER_CASE(NP_NAME, PD_NAME)                      \
-  case NPY_##NP_NAME:                                               \
-    RETURN_NOT_OK(convert_numpy_array<NPY_##NP_NAME>(arr, out));    \
+#define NUMPY_CONVERTER_CASE(NP_NAME, PD_NAME)                   \
+  case NPY_##NP_NAME:                                            \
+    RETURN_NOT_OK(convert_numpy_array<NPY_##NP_NAME>(arr, out)); \
     break;
-
 
 Status array_from_numpy(PyObject* arr, Array** out) {
   int type_num = PyArray_TYPE(reinterpret_cast<PyArrayObject*>(arr));
@@ -102,21 +95,17 @@ Status array_from_numpy(PyObject* arr, Array** out) {
   return Status::OK();
 }
 
-
 // Convert a NumPy array to a pandas::Array with appropriate missing values set
 // according to the passed uint8 dtype mask array
 Status array_from_masked_numpy(PyObject* arr, PyObject* mask, Array** out) {
   return Status::NotImplemented();
 }
 
-
 // ----------------------------------------------------------------------
 // NumPy array container
 
 NumPyBuffer::~NumPyBuffer() {
-  if (arr_ != nullptr) {
-    Py_DECREF(arr_);
-  }
+  if (arr_ != nullptr) { Py_DECREF(arr_); }
 }
 
 Status NumPyBuffer::Init(PyObject* arr) {
@@ -136,7 +125,7 @@ int NumPyBuffer::stride() {
   return static_cast<int>(PyArray_STRIDES(array())[0]);
 }
 
-  PyObject* GetItem(size_t i);
-  void PySetItem(size_t i, PyObject* val);
+PyObject* GetItem(size_t i);
+void PySetItem(size_t i, PyObject* val);
 
-} // namespace pandas
+}  // namespace pandas

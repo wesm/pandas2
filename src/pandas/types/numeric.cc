@@ -23,11 +23,11 @@ static inline std::shared_ptr<DataType> get_type_singleton() {
   return nullptr;
 }
 
-#define MAKE_TYPE_SINGLETON(NAME)                                       \
-  static const auto k##NAME = std::make_shared<NAME##Type>();           \
-  template <>                                                           \
-  inline std::shared_ptr<DataType> get_type_singleton<NAME##Type>() {   \
-    return k##NAME;                                                     \
+#define MAKE_TYPE_SINGLETON(NAME)                                     \
+  static const auto k##NAME = std::make_shared<NAME##Type>();         \
+  template <>                                                         \
+  inline std::shared_ptr<DataType> get_type_singleton<NAME##Type>() { \
+    return k##NAME;                                                   \
   }
 
 MAKE_TYPE_SINGLETON(Int8);
@@ -46,8 +46,7 @@ MAKE_TYPE_SINGLETON(Double);
 
 FloatingArray::FloatingArray(
     const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data)
-    : NumericArray(type, length),
-      data_(data) {}
+    : NumericArray(type, length), data_(data) {}
 
 // ----------------------------------------------------------------------
 // Specific implementations
@@ -98,16 +97,13 @@ template class FloatingArrayImpl<DoubleType>;
 // ----------------------------------------------------------------------
 // Any integer
 
-IntegerArray::IntegerArray(const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data)
-    : NumericArray(type, length),
-      data_(data),
-      valid_bits_(nullptr) {}
+IntegerArray::IntegerArray(
+    const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data)
+    : NumericArray(type, length), data_(data), valid_bits_(nullptr) {}
 
-IntegerArray::IntegerArray(const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data,
-    const std::shared_ptr<Buffer>& valid_bits)
-    : NumericArray(type, length),
-      data_(data),
-      valid_bits_(valid_bits) {}
+IntegerArray::IntegerArray(const TypePtr type, int64_t length,
+    const std::shared_ptr<Buffer>& data, const std::shared_ptr<Buffer>& valid_bits)
+    : NumericArray(type, length), data_(data), valid_bits_(valid_bits) {}
 
 int64_t IntegerArray::GetNullCount() {
   // TODO(wesm)
@@ -145,9 +141,7 @@ PyObject* IntegerArrayImpl<TYPE>::GetItem(int64_t i) {
 template <typename TYPE>
 bool IntegerArrayImpl<TYPE>::owns_data() const {
   bool owns_data = data_.use_count() == 1;
-  if (valid_bits_) {
-    owns_data &= valid_bits_.use_count() == 1;
-  }
+  if (valid_bits_) { owns_data &= valid_bits_.use_count() == 1; }
   return owns_data;
 }
 
@@ -168,8 +162,8 @@ Status IntegerArrayImpl<TYPE>::Copy(
   return Status::OK();
 }
 
-static Status PyObjectToInt64(PyObject *obj, int64_t* out) {
-  PyObject *num = PyNumber_Long(obj);
+static Status PyObjectToInt64(PyObject* obj, int64_t* out) {
+  PyObject* num = PyNumber_Long(obj);
 
   RETURN_IF_PYERROR();
   *out = PyLong_AsLongLong(num);
@@ -186,9 +180,7 @@ Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
     }
     BitUtil::ClearBit(valid_bits_->mutable_data(), i);
   } else {
-    if (valid_bits_) {
-      BitUtil::SetBit(valid_bits_->mutable_data(), i);
-    }
+    if (valid_bits_) { BitUtil::SetBit(valid_bits_->mutable_data(), i); }
     int64_t cval;
     RETURN_NOT_OK(PyObjectToInt64(val, &cval));
 
@@ -198,7 +190,6 @@ Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
   RETURN_IF_PYERROR();
   return Status::OK();
 }
-
 
 // Instantiate templates
 template class IntegerArrayImpl<UInt8Type>;
@@ -210,4 +201,4 @@ template class IntegerArrayImpl<Int32Type>;
 template class IntegerArrayImpl<UInt64Type>;
 template class IntegerArrayImpl<Int64Type>;
 
-} // namespace pandas
+}  // namespace pandas

@@ -26,8 +26,9 @@ class TestArray : public ::testing::Test {
   void SetUp() {
     values_ = {0, 1, 2, 3, 4, 5, 6, 7};
 
-    auto buffer = std::make_shared<Buffer>(reinterpret_cast<const uint8_t*>(values_.data()),
-        values_.size() * sizeof(double));
+    auto buffer =
+        std::make_shared<Buffer>(reinterpret_cast<const uint8_t*>(values_.data()),
+            values_.size() * sizeof(double));
 
     array_ = std::make_shared<DoubleArray>(values_.size(), buffer);
   }
@@ -55,8 +56,9 @@ class TestArrayView : public ::testing::Test {
   void SetUp() {
     values_ = {0, 1, 2, 3, 4, 5, 6, 7};
 
-    auto buffer = std::make_shared<Buffer>(reinterpret_cast<const uint8_t*>(values_.data()),
-        values_.size() * sizeof(value_t));
+    auto buffer =
+        std::make_shared<Buffer>(reinterpret_cast<const uint8_t*>(values_.data()),
+            values_.size() * sizeof(value_t));
 
     auto arr = std::make_shared<DoubleArray>(values_.size(), buffer);
     view_ = ArrayView(arr);

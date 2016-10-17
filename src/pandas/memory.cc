@@ -9,8 +9,8 @@
 #include <mutex>
 #include <sstream>
 
-#include "pandas/util/logging.h"
 #include "pandas/status.h"
+#include "pandas/util/logging.h"
 
 namespace pandas {
 

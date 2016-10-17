@@ -8,9 +8,9 @@
 
 #include "gtest/gtest.h"
 
-#include "pandas/test-util.h"
 #include "pandas/memory.h"
 #include "pandas/status.h"
+#include "pandas/test-util.h"
 
 namespace pandas {
 

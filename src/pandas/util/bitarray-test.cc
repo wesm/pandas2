@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
+#include "pandas/status.h"
 #include "pandas/test-util.h"
 #include "pandas/util/bitarray.h"
-#include "pandas/status.h"
 
 namespace pandas {
 
@@ -27,4 +27,4 @@ TEST(BitArrayTests, TestBasics) {
   ASSERT_FALSE(arr.IsSet(5));
 }
 
-} // namespace pandas
+}  // namespace pandas

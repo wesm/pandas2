@@ -9,9 +9,8 @@ PyObject* BooleanArray::GetValue(size_t i) {
   return NULL;
 }
 
-
 void BooleanArray::SetValue(size_t i, PyObject* val) {
   return;
 }
 
-} // namespace pandas
+}  // namespace pandas

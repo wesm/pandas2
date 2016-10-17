@@ -14,7 +14,6 @@ namespace pandas {
 
 class DataType {
  public:
-
   enum TypeId {
     // A degerate NULL type
     NA = 0,
@@ -52,16 +51,13 @@ class DataType {
     CATEGORY = 16
   };
 
-  explicit DataType(TypeId type)
-      : type_(type) {}
+  explicit DataType(TypeId type) : type_(type) {}
 
   virtual ~DataType() {}
 
   virtual std::string ToString() const = 0;
 
-  virtual bool Equals(const DataType& other) {
-    return type_ == other.type_;
-  }
+  virtual bool Equals(const DataType& other) { return type_ == other.type_; }
 
   TypeId type() const { return type_; }
 
@@ -69,77 +65,54 @@ class DataType {
   TypeId type_;
 };
 
-
 typedef std::shared_ptr<DataType> TypePtr;
-
 
 class PANDAS_EXPORT TimestampType : public DataType {
  public:
-  enum class Unit: char {
-    SECOND = 0,
-    MILLISECOND = 1,
-    MICROSECOND = 2,
-    NANOSECOND = 3
-  };
+  enum class Unit : char { SECOND = 0, MILLISECOND = 1, MICROSECOND = 2, NANOSECOND = 3 };
 
   Unit unit;
 
   explicit TimestampType(Unit unit = Unit::MICROSECOND)
-      : DataType(DataType::TIMESTAMP),
-        unit(unit) {}
+      : DataType(DataType::TIMESTAMP), unit(unit) {}
 
-  TimestampType(const TimestampType& other)
-      : TimestampType(other.unit) {}
+  TimestampType(const TimestampType& other) : TimestampType(other.unit) {}
 
-  static char const *name() {
-    return "timestamp";
-  }
+  static char const* name() { return "timestamp"; }
 
   std::string ToString() const override;
 };
-
 
 class PANDAS_EXPORT PyObjectType : public DataType {
  public:
-
   PyObjectType() : DataType(DataType::PYOBJECT) {}
 
-  PyObjectType(const PyObjectType& other)
-      : PyObjectType() {}
+  PyObjectType(const PyObjectType& other) : PyObjectType() {}
 
-  static char const *name() {
-    return "object";
-  }
+  static char const* name() { return "object"; }
 
   std::string ToString() const override;
 };
-
 
 template <typename Derived>
 class PANDAS_EXPORT PrimitiveType : public DataType {
  public:
-  PrimitiveType()
-      : DataType(Derived::type_enum) {}
+  PrimitiveType() : DataType(Derived::type_enum) {}
 
   std::string ToString() const override {
     return std::string(static_cast<const Derived*>(this)->name());
   }
 };
 
-
-#define PRIMITIVE_DECL(TYPENAME, C_TYPE, ENUM, SIZE, NAME)          \
-  public:                                                           \
-   typedef C_TYPE c_type;                                           \
-   static constexpr DataType::TypeId type_enum = DataType::ENUM;    \
-   static constexpr size_t size = SIZE;                             \
-                                                                    \
-   explicit TYPENAME()                                              \
-       : PrimitiveType<TYPENAME>() {}                               \
-                                                                    \
-   static const char* name() {                                      \
-     return NAME;                                                   \
-   }
-
+#define PRIMITIVE_DECL(TYPENAME, C_TYPE, ENUM, SIZE, NAME)      \
+ public:                                                        \
+  typedef C_TYPE c_type;                                        \
+  static constexpr DataType::TypeId type_enum = DataType::ENUM; \
+  static constexpr size_t size = SIZE;                          \
+                                                                \
+  explicit TYPENAME() : PrimitiveType<TYPENAME>() {}            \
+                                                                \
+  static const char* name() { return NAME; }
 
 class PANDAS_EXPORT NullType : public PrimitiveType<NullType> {
   PRIMITIVE_DECL(NullType, void, NA, 0, "null");
@@ -189,4 +162,4 @@ class PANDAS_EXPORT BooleanType : public PrimitiveType<BooleanType> {
   PRIMITIVE_DECL(BooleanType, uint8_t, BOOL, 1, "bool");
 };
 
-} // namespace pandas
+}  // namespace pandas

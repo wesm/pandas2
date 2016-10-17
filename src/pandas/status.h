@@ -18,51 +18,55 @@
 #ifndef PANDAS_STATUS_H_
 #define PANDAS_STATUS_H_
 
-#include <string>
 #include <cstdio>
 #include <cstring>
+#include <string>
 
 // Return the given status if it is not OK.
-#define PANDAS_RETURN_NOT_OK(s) do {           \
-    ::pandas::Status _s = (s);                 \
-    if (!_s.ok()) return _s;                    \
+#define PANDAS_RETURN_NOT_OK(s) \
+  do {                          \
+    ::pandas::Status _s = (s);  \
+    if (!_s.ok()) return _s;    \
   } while (0);
 
 // Return the given status if it is not OK, but first clone it and
 // prepend the given message.
-#define PANDAS_RETURN_NOT_OK_PREPEND(s, msg) do {                      \
-    ::pandas::Status _s = (s);                                         \
+#define PANDAS_RETURN_NOT_OK_PREPEND(s, msg)                              \
+  do {                                                                    \
+    ::pandas::Status _s = (s);                                            \
     if (::gutil::PREDICT_FALSE(!_s.ok())) return _s.CloneAndPrepend(msg); \
   } while (0);
 
 // Return 'to_return' if 'to_call' returns a bad status.
 // The substitution for 'to_return' may reference the variable
 // 's' for the bad status.
-#define PANDAS_RETURN_NOT_OK_RET(to_call, to_return) do { \
-    ::pandas::Status s = (to_call); \
-    if (::gutil::PREDICT_FALSE(!s.ok())) return (to_return);    \
+#define PANDAS_RETURN_NOT_OK_RET(to_call, to_return)         \
+  do {                                                       \
+    ::pandas::Status s = (to_call);                          \
+    if (::gutil::PREDICT_FALSE(!s.ok())) return (to_return); \
   } while (0);
 
 // If 'to_call' returns a bad status, CHECK immediately with a logged message
 // of 'msg' followed by the status.
-#define PANDAS_CHECK_OK_PREPEND(to_call, msg) do {         \
-::pandas::Status _s = (to_call);                           \
-PANDAS_CHECK(_s.ok()) << (msg) << ": " << _s.ToString();   \
-} while (0);
+#define PANDAS_CHECK_OK_PREPEND(to_call, msg)                \
+  do {                                                       \
+    ::pandas::Status _s = (to_call);                         \
+    PANDAS_CHECK(_s.ok()) << (msg) << ": " << _s.ToString(); \
+  } while (0);
 
 // If the status is bad, CHECK immediately, appending the status to the
 // logged message.
 #define PANDAS_CHECK_OK(s) PANDAS_CHECK_OK_PREPEND(s, "Bad status")
 
-
 namespace pandas {
 
-#define RETURN_NOT_OK(s) do {                   \
-    Status _s = (s);                            \
-    if (!_s.ok()) return _s;                    \
+#define RETURN_NOT_OK(s)     \
+  do {                       \
+    Status _s = (s);         \
+    if (!_s.ok()) return _s; \
   } while (0);
 
-enum class StatusCode: char {
+enum class StatusCode : char {
   OK = 0,
   OutOfMemory = 1,
   KeyError = 2,
@@ -74,7 +78,7 @@ enum class StatusCode: char {
 class Status {
  public:
   // Create a success status.
-  Status() : state_(NULL) { }
+  Status() : state_(NULL) {}
   ~Status() { delete[] state_; }
 
   // Copy the specified status.
@@ -130,8 +134,7 @@ class Status {
   const char* state_;
 
   StatusCode code() const {
-    return ((state_ == NULL) ?
-        StatusCode::OK : static_cast<StatusCode>(state_[4]));
+    return ((state_ == NULL) ? StatusCode::OK : static_cast<StatusCode>(state_[4]));
   }
 
   Status(StatusCode code, const std::string& msg, int16_t posix_code);
@@ -153,5 +156,4 @@ inline void Status::operator=(const Status& s) {
 
 }  // namespace pandas
 
-
-#endif // PANDAS_STATUS_H_
+#endif  // PANDAS_STATUS_H_

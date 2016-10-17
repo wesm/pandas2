@@ -8,9 +8,9 @@
 
 #include "pandas/array.h"
 #include "pandas/numpy_interop.h"
+#include "pandas/status.h"
 #include "pandas/type.h"
 #include "pandas/util/bitarray.h"
-#include "pandas/status.h"
 
 namespace pandas {
 
@@ -24,6 +24,6 @@ class BooleanArray : public Array {
   BitArray nulls_;
 };
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_TYPES_BOOLEAN_H
+#endif  // PANDAS_TYPES_BOOLEAN_H
