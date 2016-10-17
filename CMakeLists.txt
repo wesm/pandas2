@@ -574,7 +574,7 @@ if (UNIX)
   # Full lint
   add_custom_target(lint ${BUILD_SUPPORT_DIR}/cpplint.py
   --verbose=4
-  --filter=-whitespace/comments,-readability/todo,-build/header_guard,-build/include_order
+  --filter=-whitespace/comments,-readability/todo,-build/header_guard,-build/include_order,-build/c++11
     `find ${CMAKE_CURRENT_SOURCE_DIR}/src -name \\*.cc -or -name \\*.h`)
 endif (UNIX)
 
@@ -611,12 +611,12 @@ set(PANDAS_SRCS
   src/pandas/numpy_interop.cc
   src/pandas/pytypes.cc
   src/pandas/status.cc
-  src/pandas/types.cc
+  src/pandas/type.cc
 
   src/pandas/types/boolean.cc
+  src/pandas/types/common.cc
   src/pandas/types/category.cc
-  src/pandas/types/integer.cc
-  src/pandas/types/floating.cc
+  src/pandas/types/numeric.cc
 )
 
 add_library(pandas SHARED

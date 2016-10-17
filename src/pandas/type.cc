@@ -1,7 +1,7 @@
 // This file is a part of pandas. See LICENSE for details about reuse and
 // copyright holders
 
-#include "pandas/types.h"
+#include "pandas/type.h"
 
 #include <cstdint>
 #include <sstream>

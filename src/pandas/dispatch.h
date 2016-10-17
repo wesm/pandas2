@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "pandas/types.h"
+#include "pandas/type.h"
 
 namespace pandas {
 

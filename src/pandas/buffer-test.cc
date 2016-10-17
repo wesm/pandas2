@@ -85,4 +85,33 @@ TEST_F(TestBuffer, EqualsWithSameBuffer) {
   pool->Free(rawBuffer, bufferSize);
 }
 
+TEST_F(TestBuffer, Copy) {
+  std::string data_str = "some data to copy";
+
+  auto data = reinterpret_cast<const uint8_t*>(data_str.c_str());
+
+  Buffer buf(data, data_str.size());
+
+  std::shared_ptr<Buffer> out;
+
+  ASSERT_OK(buf.Copy(5, 4, &out));
+
+  Buffer expected(data + 5, 4);
+  ASSERT_TRUE(out->Equals(expected));
+}
+
+TEST_F(TestBuffer, SliceBuffer) {
+  std::string data_str = "some data to slice";
+
+  auto data = reinterpret_cast<const uint8_t*>(data_str.c_str());
+
+  auto buf = std::make_shared<Buffer>(data, data_str.size());
+
+  std::shared_ptr<Buffer> out = SliceBuffer(buf, 5, 4);
+  Buffer expected(data + 5, 4);
+  ASSERT_TRUE(out->Equals(expected));
+
+  ASSERT_EQ(2, buf.use_count());
+}
+
 }  // namespace pandas

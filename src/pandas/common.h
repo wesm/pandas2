@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "pandas/config.h"
 
 namespace pandas {
@@ -11,7 +13,7 @@ class OwnedRef {
  public:
   OwnedRef() : obj_(nullptr) {}
 
-  OwnedRef(PyObject* obj) :
+  explicit OwnedRef(PyObject* obj) :
       obj_(obj) {}
 
   ~OwnedRef() {
@@ -29,7 +31,7 @@ class OwnedRef {
     obj_ = nullptr;
   }
 
-  PyObject* obj() const{
+  PyObject* obj() const {
     return obj_;
   }
 
@@ -41,7 +43,7 @@ struct PyObjectStringify {
   OwnedRef tmp_obj;
   const char* bytes;
 
-  PyObjectStringify(PyObject* obj) {
+  explicit PyObjectStringify(PyObject* obj) {
     PyObject* bytes_obj;
     if (PyUnicode_Check(obj)) {
       bytes_obj = PyUnicode_AsUTF8String(obj);

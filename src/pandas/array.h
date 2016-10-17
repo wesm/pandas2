@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "pandas/types.h"
+#include "pandas/type.h"
 #include "pandas/util.h"
 
 namespace pandas {
@@ -17,6 +17,7 @@ namespace pandas {
 // Forward declarations
 class Status;
 
+// Base class for physical array data structures.
 class Array {
  public:
   virtual ~Array() {}
@@ -25,85 +26,71 @@ class Array {
   std::shared_ptr<DataType> type() const { return type_;}
   DataType::TypeId type_id() const { return type_->type();}
 
+  // Copy a section of the array into a new output array
+  virtual Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const = 0;
+
+  // Copy the entire array (using the virtual Copy function)
+  Status Copy(std::shared_ptr<Array>* out) const;
+
   virtual int64_t GetNullCount() = 0;
 
   virtual PyObject* GetItem(int64_t i) = 0;
   virtual Status SetItem(int64_t i, PyObject* val) = 0;
 
+  // For each array type, determine if all of its memory buffers belong to it
+  // (for determining if they can be safely mutated). Otherwise, they may need
+  // to be copied (for copy-on-write operations)
+  virtual bool owns_data() const = 0;
+
  protected:
   std::shared_ptr<DataType> type_;
   int64_t length_;
 
-  Array(const std::shared_ptr<DataType>& type, int64_t length)
-      : type_(type), length_(length) {}
-
-  virtual Status EnsureMutable() = 0;
+  Array(const std::shared_ptr<DataType>& type, int64_t length);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Array);
 };
 
+// An object that is a view on a section of another array (possibly the whole
+// array). This is used to implement slicing and copy-on-write.
+class ArrayView {
+ public:
+  ArrayView() {}
 
-typedef std::shared_ptr<Array> ArrayPtr;
+  explicit ArrayView(const std::shared_ptr<Array>& data);
+  ArrayView(const std::shared_ptr<Array>& data, int64_t offset);
+  ArrayView(const std::shared_ptr<Array>& data, int64_t offset, int64_t length);
 
-// TODO: define an operator model
+  // Copy / move constructor
+  ArrayView(const ArrayView& other);
+  ArrayView(ArrayView&& other);
 
-// Shallow copy
-// virtual Status Copy(Array** out);
+  // Copy / move assignment
+  ArrayView& operator=(const ArrayView& other);
+  ArrayView& operator=(ArrayView&& other);
 
-// Type casting
-// virtual Status Cast(const TypePtr& new_type);
+  // If the contained array is not the sole reference to that array, then
+  // mutation operations must produce a copy of the referenced
+  Status EnsureMutable();
 
-// Python get scalar
-// virtual PyObject* GetValue(int64_t i) = 0;
-// virtual void SetValue(int64_t i, PyObject* val) = 0;
+  // Construct view from start offset to the end of the array
+  ArrayView Slice(int64_t offset);
 
-// ----------------------------------------------------------------------
-// Indexing
+  // Construct view from start offset of the indicated length
+  ArrayView Slice(int64_t offset, int64_t length);
 
-// Slice the array. The result is not a copy but will have copy-on-write
-// semantics
-// virtual Status Slice(int64_t start, int64_t end, Array** out);
+  std::shared_ptr<Array> data() const { return data_; }
+  int64_t offset() const { return offset_; }
+  int64_t length() const { return length_; }
 
-// virtual Status Filter(Array* mask, Array** out);
+  // Return the reference count for the underlying array
+  int64_t ref_count() const;
 
-// virtual Status Put(Array* indices, Array* values, Array** out);
-// virtual Status Take(Array* indices, Array** out);
-
-// ----------------------------------------------------------------------
-// Array-Array binary operations
-
-// Array-Scalar binary operations
-
-// ----------------------------------------------------------------------
-// Array equality
-// virtual bool Equals(Array* other);
-// virtual bool AlmostEquals(Array* other);
-
-// virtual Status IsNull(Array** out);
-// virtual Status NotNull(Array** out);
-
-// ----------------------------------------------------------------------
-// Array APIs from NumPy / APL-variants
-// virtual Status Repeat(int64_t repeats, Array** out);
-// virtual Status Repeat(Array* repeats, Array** out);
-
-// virtual Status Tile(int64_t tiles, Array** out);
-
-// ----------------------------------------------------------------------
-// Missing data methods
-
-// virtual Status FillNull(const Scalar& fill_value, Array** out);
-
-// ----------------------------------------------------------------------
-// Hash table-based functions
-
-// virtual Status Isin(Array* other, Array** out);
-// virtual Status Match(Array* other, Array** out);
-// virtual Status Unique(Array** out);
-// virtual Status ValueCounts(Array** out);
-
-// Requires a scalar box
-// virtual Status Mode(Scalar* out);
+ private:
+  std::shared_ptr<Array> data_;
+  int64_t offset_;
+  int64_t length_;
+};
 
 } // namespace pandas

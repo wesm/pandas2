@@ -31,7 +31,7 @@
 #include <numpy/ufuncobject.h>
 
 #include "pandas/array.h"
-#include "pandas/types.h"
+#include "pandas/type.h"
 
 namespace pandas {
 
