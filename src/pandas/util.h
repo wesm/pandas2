@@ -7,8 +7,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)      \
-  TypeName(const TypeName&) = delete;           \
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&) = delete;      \
   void operator=(const TypeName&) = delete
 
 namespace pandas {
@@ -31,7 +31,6 @@ static inline void set_bit(uint8_t* bits, size_t i, bool is_set) {
   bits[i / 8] |= (1 << (i % 8)) * is_set;
 }
 
-
 static inline size_t next_power2(size_t n) {
   n--;
   n |= n >> 1;
@@ -39,9 +38,7 @@ static inline size_t next_power2(size_t n) {
   n |= n >> 4;
   n |= n >> 8;
   n |= n >> 16;
-  if (sizeof(size_t) == 8) {
-    n |= n >> 32;
-  }
+  if (sizeof(size_t) == 8) { n |= n >> 32; }
   n++;
   return n;
 }
@@ -53,9 +50,7 @@ static void bytes_to_bits(uint8_t* bytes, size_t length, uint8_t* bits) {
 }
 
 static uint8_t* bytes_to_bits(uint8_t* bytes, size_t length, size_t* out_length) {
-  if (!length) {
-    return nullptr;
-  }
+  if (!length) { return nullptr; }
   size_t bit_length = *out_length = ceil_byte(length) / 8;
 
   // TODO: it would be better to do this in preallocated memory
@@ -71,8 +66,8 @@ static uint8_t* bytes_to_bits(uint8_t* bytes, size_t length, size_t* out_length)
   return result;
 }
 
-} // namespace util
+}  // namespace util
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_UTIL_H
+#endif  // PANDAS_UTIL_H

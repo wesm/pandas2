@@ -4,8 +4,8 @@
 #ifndef PANDAS_UTIL_BITARRAY_H
 #define PANDAS_UTIL_BITARRAY_H
 
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 
 namespace pandas {
 
@@ -18,9 +18,7 @@ class BitArray {
 
   Status Init(size_t length);
 
-  bool IsSet(size_t i) {
-    return bits_[i / 8] & (1 << (i % 8));
-  }
+  bool IsSet(size_t i) { return bits_[i / 8] & (1 << (i % 8)); }
 
   void Set(size_t i) {
     if (!IsSet(i)) ++count_;
@@ -49,13 +47,9 @@ class BitArray {
   //   }
   // }
 
-  size_t set_count() {
-    return count_;
-  }
+  size_t set_count() { return count_; }
 
-  size_t length() {
-    return length_;
-  }
+  size_t length() { return length_; }
 
  private:
   size_t length_;
@@ -63,6 +57,6 @@ class BitArray {
   size_t count_;
 };
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_UTIL_BITARRAY_H
+#endif  // PANDAS_UTIL_BITARRAY_H

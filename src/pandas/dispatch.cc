@@ -7,9 +7,9 @@
 
 namespace pandas {
 
-#define MAKE_TYPE_CASE(NAME, CapName)           \
-  case NAME:                                    \
-    *out = new CapName##Type();                 \
+#define MAKE_TYPE_CASE(NAME, CapName) \
+  case NAME:                          \
+    *out = new CapName##Type();       \
     break;
 
 Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out) {
@@ -32,4 +32,4 @@ Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out) {
   return Status::OK();
 }
 
-} // namespace pandas
+}  // namespace pandas

@@ -8,6 +8,6 @@ namespace pandas {
 
 void libpandas_init();
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_INIT_H
+#endif  // PANDAS_INIT_H

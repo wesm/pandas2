@@ -12,8 +12,7 @@ namespace pandas {
 // Array
 
 Array::Array(const std::shared_ptr<DataType>& type, int64_t length)
-    : type_(type),
-      length_(length) {}
+    : type_(type), length_(length) {}
 
 Status Array::Copy(std::shared_ptr<Array>* out) const {
   return Copy(0, length_, out);
@@ -23,23 +22,17 @@ Status Array::Copy(std::shared_ptr<Array>* out) const {
 // ArrayView
 
 ArrayView::ArrayView(const std::shared_ptr<Array>& data)
-    : data_(data),
-      offset_(0),
-      length_(data->length()) {}
+    : data_(data), offset_(0), length_(data->length()) {}
 
 ArrayView::ArrayView(const std::shared_ptr<Array>& data, int64_t offset)
-    : data_(data),
-      offset_(offset),
-      length_(data->length() - offset) {
+    : data_(data), offset_(offset), length_(data->length() - offset) {
   // Debugging sanity checks
   PANDAS_DCHECK_GE(offset, 0);
   PANDAS_DCHECK_LT(offset, data->length());
 }
 
 ArrayView::ArrayView(const std::shared_ptr<Array>& data, int64_t offset, int64_t length)
-    : data_(data),
-      offset_(offset),
-      length_(length) {
+    : data_(data), offset_(offset), length_(length) {
   // Debugging sanity checks
   PANDAS_DCHECK_GE(offset, 0);
   PANDAS_DCHECK_LT(offset, data->length());
@@ -49,15 +42,11 @@ ArrayView::ArrayView(const std::shared_ptr<Array>& data, int64_t offset, int64_t
 
 // Copy ctor
 ArrayView::ArrayView(const ArrayView& other)
-    : data_(other.data_),
-      offset_(other.offset_),
-      length_(other.length_) {}
+    : data_(other.data_), offset_(other.offset_), length_(other.length_) {}
 
 // Move ctor
 ArrayView::ArrayView(ArrayView&& other)
-    : data_(std::move(other.data_)),
-      offset_(other.offset_),
-      length_(other.length_) {}
+    : data_(std::move(other.data_)), offset_(other.offset_), length_(other.length_) {}
 
 // Copy assignment
 ArrayView& ArrayView::operator=(const ArrayView& other) {
@@ -97,4 +86,4 @@ int64_t ArrayView::ref_count() const {
   return data_.use_count();
 }
 
-} // namespace pandas
+}  // namespace pandas

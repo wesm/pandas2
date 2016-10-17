@@ -12,13 +12,9 @@
 // A table of equal-length pandas arrays
 class Table {
  public:
-  ArrayPtr column(size_t i) {
-    return columns_[i];
-  }
+  ArrayPtr column(size_t i) { return columns_[i]; }
 
-  size_t ncols() {
-    return columns_.size();
-  }
+  size_t ncols() { return columns_.size(); }
 
  protected:
   std::vector<ArrayPtr> columns_;

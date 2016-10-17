@@ -23,9 +23,9 @@ std::string TimestampType::ToString() const {
   std::stringstream ss;
 
   // TODO(wesm): Add unit string
-  ss << name() << "[" << "]";
+  ss << name() << "["
+     << "]";
   return ss.str();
 }
-
 
 }  // namespace pandas

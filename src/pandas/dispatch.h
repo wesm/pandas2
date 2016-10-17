@@ -10,5 +10,4 @@ namespace pandas {
 class Status;
 
 Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out);
-
 }

@@ -38,8 +38,8 @@ Status Buffer::Copy(int64_t start, int64_t nbytes, std::shared_ptr<Buffer>* out)
   return Status::OK();
 }
 
-std::shared_ptr<Buffer> SliceBuffer(const std::shared_ptr<Buffer>& buffer, int64_t offset,
-    int64_t length) {
+std::shared_ptr<Buffer> SliceBuffer(
+    const std::shared_ptr<Buffer>& buffer, int64_t offset, int64_t length) {
   PANDAS_DCHECK_LT(offset, buffer->size());
   PANDAS_DCHECK_LE(length, buffer->size() - offset);
   return std::make_shared<Buffer>(buffer, offset, length);

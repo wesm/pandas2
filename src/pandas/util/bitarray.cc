@@ -5,8 +5,8 @@
 
 #include <new>
 
-#include "pandas/util.h"
 #include "pandas/status.h"
+#include "pandas/util.h"
 
 namespace pandas {
 
@@ -27,4 +27,4 @@ Status BitArray::Init(size_t length) {
   return Status::OK();
 }
 
-} // namespace pandas
+}  // namespace pandas

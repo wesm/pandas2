@@ -6,8 +6,8 @@
 #include "pandas/config.h"
 
 #include "pandas/array.h"
-#include "pandas/type.h"
 #include "pandas/status.h"
+#include "pandas/type.h"
 
 namespace pandas {
 
@@ -101,4 +101,4 @@ extern template class PANDAS_EXPORT IntegerArrayImpl<UInt64Type>;
 extern template class PANDAS_EXPORT FloatingArrayImpl<FloatType>;
 extern template class PANDAS_EXPORT FloatingArrayImpl<DoubleType>;
 
-} // namespace pandas
+}  // namespace pandas

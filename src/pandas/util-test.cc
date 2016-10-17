@@ -30,4 +30,4 @@ TEST(UtilTests, TestNextPower2) {
   ASSERT_EQ(1ULL << 63, next_power2((1ULL << 63) - 1));
 }
 
-} // namespace pandas
+}  // namespace pandas

@@ -16,31 +16,22 @@
 namespace pandas {
 
 struct CategoryType : public DataType {
-
   explicit CategoryType(const ArrayView& categories)
-      : DataType(DataType::CATEGORY),
-        categories_(categories) {}
+      : DataType(DataType::CATEGORY), categories_(categories) {}
 
   std::string ToString() const override;
 
-  std::shared_ptr<DataType> category_type() const {
-    return categories_.data()->type();
-  }
+  std::shared_ptr<DataType> category_type() const { return categories_.data()->type(); }
 
-  const ArrayView& categories() const {
-    return categories_;
-  }
+  const ArrayView& categories() const { return categories_; }
 
  protected:
   ArrayView categories_;
 };
 
-
 class CategoryArray : public Array {
  public:
-  const ArrayView& codes() const {
-    return codes_;
-  }
+  const ArrayView& codes() const { return codes_; }
 
   const ArrayView& categories() const {
     return static_cast<CategoryType*>(type_.get())->categories();
@@ -50,4 +41,4 @@ class CategoryArray : public Array {
   ArrayView codes_;
 };
 
-} // namespace pandas
+}  // namespace pandas

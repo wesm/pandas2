@@ -19,8 +19,8 @@ static inline bool is_na(PyObject* obj) {
   return (obj == NA) || PyObject_IsInstance(obj, NAType);
 }
 
-} // namespace py
+}  // namespace py
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_PYTYPES_H
+#endif  // PANDAS_PYTYPES_H

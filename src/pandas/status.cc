@@ -5,11 +5,10 @@
 #include "pandas/status.h"
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 namespace pandas {
-
 
 Status::Status(StatusCode code, const std::string& msg, int16_t posix_code) {
   assert(code != StatusCode::OK);
@@ -31,9 +30,7 @@ const char* Status::CopyState(const char* state) {
 }
 
 std::string Status::CodeAsString() const {
-  if (state_ == NULL) {
-    return "OK";
-  }
+  if (state_ == NULL) { return "OK"; }
 
   const char* type;
   switch (code()) {
@@ -61,9 +58,7 @@ std::string Status::CodeAsString() const {
 
 std::string Status::ToString() const {
   std::string result(CodeAsString());
-  if (state_ == NULL) {
-    return result;
-  }
+  if (state_ == NULL) { return result; }
 
   result.append(": ");
 

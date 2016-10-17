@@ -25,39 +25,39 @@ namespace pandas {
 #define PANDAS_LOG_INTERNAL(level) ::pandas::internal::CerrLog(level)
 #define PANDAS_LOG(level) PANDAS_LOG_INTERNAL(PANDAS_##level)
 
-#define PANDAS_CHECK(condition)                               \
+#define PANDAS_CHECK(condition)                                \
   (condition) ? 0 : ::pandas::internal::FatalLog(PANDAS_FATAL) \
                         << __FILE__ << __LINE__ << " Check failed: " #condition " "
 
 #ifdef NDEBUG
 #define PANDAS_DFATAL PANDAS_WARNING
 
-#define PANDAS_DCHECK(condition)                \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK(condition) \
+  while (false)                  \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_EQ(val1, val2)            \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK_EQ(val1, val2) \
+  while (false)                      \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_NE(val1, val2)            \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK_NE(val1, val2) \
+  while (false)                      \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_LE(val1, val2)            \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK_LE(val1, val2) \
+  while (false)                      \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_LT(val1, val2)            \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK_LT(val1, val2) \
+  while (false)                      \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_GE(val1, val2)            \
-  while (false)                                 \
-  ::pandas::internal::NullLog()                 \
+#define PANDAS_DCHECK_GE(val1, val2) \
+  while (false)                      \
+  ::pandas::internal::NullLog()
 
-#define PANDAS_DCHECK_GT(val1, val2)            \
-  while (false)                                 \
+#define PANDAS_DCHECK_GT(val1, val2) \
+  while (false)                      \
   ::pandas::internal::NullLog()
 
 #else
@@ -111,9 +111,9 @@ class CerrLog {
 class FatalLog : public CerrLog {
  public:
   explicit FatalLog(int /* severity */)  // NOLINT
-      : CerrLog(PANDAS_FATAL) {}          // NOLINT
+      : CerrLog(PANDAS_FATAL){}          // NOLINT
 
-  [[noreturn]] ~FatalLog() {
+            [[noreturn]] ~FatalLog() {
     if (has_logged_) { std::cerr << std::endl; }
     std::exit(1);
   }

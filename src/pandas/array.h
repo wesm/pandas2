@@ -22,12 +22,13 @@ class Array {
  public:
   virtual ~Array() {}
 
-  int64_t length() const { return length_;}
-  std::shared_ptr<DataType> type() const { return type_;}
-  DataType::TypeId type_id() const { return type_->type();}
+  int64_t length() const { return length_; }
+  std::shared_ptr<DataType> type() const { return type_; }
+  DataType::TypeId type_id() const { return type_->type(); }
 
   // Copy a section of the array into a new output array
-  virtual Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const = 0;
+  virtual Status Copy(
+      int64_t offset, int64_t length, std::shared_ptr<Array>* out) const = 0;
 
   // Copy the entire array (using the virtual Copy function)
   Status Copy(std::shared_ptr<Array>* out) const;
@@ -93,4 +94,4 @@ class ArrayView {
   int64_t length_;
 };
 
-} // namespace pandas
+}  // namespace pandas

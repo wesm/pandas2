@@ -9,7 +9,7 @@
 
 #include "pandas/numpy_interop.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   Py_Initialize();

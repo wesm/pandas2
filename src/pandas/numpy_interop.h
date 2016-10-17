@@ -51,7 +51,6 @@ Status numpy_type_num_to_pandas(int type_num, DataType::TypeId* pandas_type);
 Status array_from_numpy(PyObject* arr, Array** out);
 Status array_from_masked_numpy(PyObject* arr, PyObject* mask, Array** out);
 
-
 // Container for strided (but contiguous) data contained in a NumPy array
 class NumPyBuffer {
  public:
@@ -62,13 +61,9 @@ class NumPyBuffer {
   size_t size();
   int stride();
 
-  PyArrayObject* array() {
-    return reinterpret_cast<PyArrayObject*>(arr_);
-  }
+  PyArrayObject* array() { return reinterpret_cast<PyArrayObject*>(arr_); }
 
-  PyArray_Descr* dtype() {
-    return PyArray_DESCR(array());
-  }
+  PyArray_Descr* dtype() { return PyArray_DESCR(array()); }
 
   char* item(size_t i) {
     char* data = reinterpret_cast<char*>(PyArray_DATA(array()));
@@ -82,6 +77,6 @@ class NumPyBuffer {
   PyObject* arr_;
 };
 
-} // namespace pandas
+}  // namespace pandas
 
-#endif // PANDAS_NUMPY_INTEROP_H
+#endif  // PANDAS_NUMPY_INTEROP_H

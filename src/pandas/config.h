@@ -8,7 +8,7 @@
 #include "pandas/visibility.h"
 
 #if PY_MAJOR_VERSION >= 3
-  #define PyString_Check PyUnicode_Check
+#define PyString_Check PyUnicode_Check
 #endif
 
 namespace pandas {
@@ -16,4 +16,4 @@ namespace pandas {
 PANDAS_EXPORT
 void libpandas_init();
 
-} // namespace pandas
+}  // namespace pandas

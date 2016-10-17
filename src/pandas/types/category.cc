@@ -11,4 +11,4 @@ std::string CategoryType::ToString() const {
   return s.str();
 }
 
-} // namespace pandas
+}  // namespace pandas

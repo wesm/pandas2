@@ -20,8 +20,7 @@ void BytesToBits(const std::vector<uint8_t>& bytes, uint8_t* bits) {
   }
 }
 
-Status BytesToBits(
-    const std::vector<uint8_t>& bytes, std::shared_ptr<Buffer>* out) {
+Status BytesToBits(const std::vector<uint8_t>& bytes, std::shared_ptr<Buffer>* out) {
   int bit_length = BytesForBits(bytes.size());
 
   auto buffer = std::make_shared<PoolBuffer>();
