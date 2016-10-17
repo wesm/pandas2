@@ -5,8 +5,8 @@
 #define PANDAS_API_H
 
 #include "pandas/array.h"
+#include "pandas/common.h"
 #include "pandas/dispatch.h"
-#include "pandas/status.h"
 #include "pandas/type.h"
 
 #include "pandas/types/boolean.h"

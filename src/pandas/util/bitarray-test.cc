@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/test-util.h"
 #include "pandas/util/bitarray.h"
 

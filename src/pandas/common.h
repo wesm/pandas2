@@ -5,9 +5,26 @@
 
 #include <string>
 
+#include "arrow/util/bit-util.h"
+#include "arrow/util/buffer.h"
+#include "arrow/util/memory-pool.h"
+#include "arrow/util/status.h"
+
 #include "pandas/config.h"
+#include "pandas/visibility.h"
 
 namespace pandas {
+
+// ----------------------------------------------------------------------
+// Common imports from libarrow
+
+namespace BitUtil = arrow::BitUtil;
+using Buffer = arrow::Buffer;
+using MutableBuffer = arrow::MutableBuffer;
+using MemoryPool = arrow::MemoryPool;
+using ResizableBuffer = arrow::ResizableBuffer;
+using PoolBuffer = arrow::PoolBuffer;
+using Status = arrow::Status;
 
 class OwnedRef {
  public:

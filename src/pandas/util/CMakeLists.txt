@@ -5,7 +5,6 @@
 
 set(UTIL_SRCS
   bitarray.cc
-  bit-util.cc
 )
 
 set(UTIL_LIBS

@@ -467,6 +467,17 @@ include_directories(SYSTEM
   thirdparty/
   src)
 
+## Arrow
+find_package(Arrow REQUIRED)
+include_directories(SYSTEM ${ARROW_INCLUDE_DIR})
+ADD_THIRDPARTY_LIB(arrow
+  SHARED_LIB ${ARROW_SHARED_LIB}
+  STATIC_LIB ${ARROW_STATIC_LIB})
+ADD_THIRDPARTY_LIB(arrow_io
+  SHARED_LIB ${ARROW_IO_SHARED_LIB})
+ADD_THIRDPARTY_LIB(arrow_ipc
+  SHARED_LIB ${ARROW_IPC_SHARED_LIB})
+
 ############################################################
 # Testing
 ############################################################
@@ -631,13 +642,11 @@ add_subdirectory(src/pandas/util)
 
 set(PANDAS_SRCS
   src/pandas/array.cc
-  src/pandas/buffer.cc
   src/pandas/dispatch.cc
   src/pandas/init.cc
   src/pandas/memory.cc
   src/pandas/numpy_interop.cc
   src/pandas/pytypes.cc
-  src/pandas/status.cc
   src/pandas/type.cc
 
   src/pandas/types/boolean.cc
@@ -649,11 +658,12 @@ set(PANDAS_SRCS
 add_library(pandas SHARED
   ${PANDAS_SRCS})
 target_link_libraries(pandas
-	pandas_util)
+  arrow
+  pandas_util)
 set_target_properties(pandas PROPERTIES LINKER_LANGUAGE CXX)
 
 if(APPLE)
-    set_target_properties(pandas PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+  set_target_properties(pandas PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 endif()
 
 ############################################################

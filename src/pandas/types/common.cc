@@ -6,10 +6,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "pandas/buffer.h"
 #include "pandas/common.h"
-#include "pandas/status.h"
-#include "pandas/util/bit-util.h"
 
 namespace pandas {
 

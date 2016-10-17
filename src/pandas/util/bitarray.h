@@ -7,9 +7,9 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace pandas {
+#include "pandas/common.h"
 
-class Status;
+namespace pandas {
 
 class BitArray {
  public:

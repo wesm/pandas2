@@ -7,14 +7,11 @@
 #include <cstring>
 #include <memory>
 
-#include "pandas/buffer.h"
 #include "pandas/common.h"
 #include "pandas/memory.h"
 #include "pandas/pytypes.h"
-#include "pandas/status.h"
 #include "pandas/type.h"
 #include "pandas/types/common.h"
-#include "pandas/util/bit-util.h"
 
 namespace pandas {
 
@@ -126,7 +123,8 @@ const typename TYPE::c_type* IntegerArrayImpl<TYPE>::data() const {
 
 template <typename TYPE>
 typename TYPE::c_type* IntegerArrayImpl<TYPE>::mutable_data() const {
-  return reinterpret_cast<T*>(data_->mutable_data());
+  auto mutable_buf = static_cast<MutableBuffer*>(data_.get());
+  return reinterpret_cast<T*>(mutable_buf->mutable_data());
 }
 
 template <typename TYPE>
@@ -173,14 +171,26 @@ static Status PyObjectToInt64(PyObject* obj, int64_t* out) {
 
 template <typename TYPE>
 Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
+  if (!data_->is_mutable()) {
+    // TODO(wesm): copy-on-write?
+    return Status::Invalid("Underlying buffer is immutable");
+  }
+
+  if (!valid_bits_->is_mutable()) {
+    // TODO(wesm): copy-on-write?
+    return Status::Invalid("Valid bits buffer is immutable");
+  }
+
   if (py::is_na(val)) {
     if (!valid_bits_) {
       // TODO: raise Python exception on error status
       RETURN_NOT_OK(AllocateValidityBitmap(length_, &valid_bits_));
     }
-    BitUtil::ClearBit(valid_bits_->mutable_data(), i);
+    auto mutable_bits = static_cast<MutableBuffer*>(valid_bits_.get())->mutable_data();
+    BitUtil::ClearBit(mutable_bits, i);
   } else {
-    if (valid_bits_) { BitUtil::SetBit(valid_bits_->mutable_data(), i); }
+    auto mutable_bits = static_cast<MutableBuffer*>(valid_bits_.get())->mutable_data();
+    if (valid_bits_) { BitUtil::SetBit(mutable_bits, i); }
     int64_t cval;
     RETURN_NOT_OK(PyObjectToInt64(val, &cval));
 

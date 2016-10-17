@@ -3,11 +3,11 @@
 
 #pragma once
 
+#include "pandas/common.h"
 #include "pandas/type.h"
 
 namespace pandas {
 
-class Status;
-
 Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out);
-}
+
+}  // namespace pandas

@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "pandas/status.h"
+#include "pandas/common.h"
 #include "pandas/types/boolean.h"
 #include "pandas/types/numeric.h"
 
@@ -98,7 +98,7 @@ Status array_from_numpy(PyObject* arr, Array** out) {
 // Convert a NumPy array to a pandas::Array with appropriate missing values set
 // according to the passed uint8 dtype mask array
 Status array_from_masked_numpy(PyObject* arr, PyObject* mask, Array** out) {
-  return Status::NotImplemented();
+  return Status::NotImplemented("NYI");
 }
 
 // ----------------------------------------------------------------------
