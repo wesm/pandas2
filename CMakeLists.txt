@@ -13,9 +13,13 @@ project(pandas)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CMakeParseArguments)
+include(ExternalProject)
 
 set(BUILD_SUPPORT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/build-support)
 set(THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
+
+set(GTEST_VERSION "1.7.0")
+set(GBENCHMARK_VERSION "1.0.0")
 
 # Allow "make install" to not depend on all targets.
 #
