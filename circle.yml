@@ -1,0 +1,15 @@
+# Configuration initially used from conda-forge/conda-smithy (BSD 3-clause)
+
+machine:
+  services:
+    - docker
+
+dependencies:
+  # Note, we used to use the naive caching of docker images, but found that it was quicker
+  # just to pull each time. #rollondockercaching
+  override:
+    - docker pull condaforge/linux-anvil
+
+test:
+  override:
+    - ./scripts/circleci_build.sh
