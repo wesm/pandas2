@@ -11,11 +11,8 @@ namespace pandas {
 // ----------------------------------------------------------------------
 // Array
 
-Array::Array(const std::shared_ptr<DataType>& type, int64_t length)
-    : type_(type), length_(length) {}
-
 Status Array::Copy(std::shared_ptr<Array>* out) const {
-  return Copy(0, length_, out);
+  return Copy(0, length(), out);
 }
 
 // ----------------------------------------------------------------------

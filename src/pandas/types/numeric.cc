@@ -21,9 +21,9 @@ namespace pandas {
 // Generic numeric class
 
 template <typename TYPE>
-NumericArray<TYPE>::NumericArray(const std::shared_ptr<DataType>& type, int64_t length,
-    const std::shared_ptr<Buffer>& data)
-    : Array(type, length), data_(data) {}
+NumericArray<TYPE>::NumericArray(const DataTypePtr& type, int64_t length,
+    const std::shared_ptr<Buffer>& data, const std::shared_ptr<Buffer>& valid_bits)
+    : Array(length, 0), type_(type), data_(data), valid_bits_(valid_bits) {}
 
 template <typename TYPE>
 auto NumericArray<TYPE>::data() const -> const T* {
@@ -41,12 +41,17 @@ std::shared_ptr<Buffer> NumericArray<TYPE>::data_buffer() const {
   return data_;
 }
 
+template <typename TYPE>
+TypePtr NumericArray<TYPE>::type() const {
+  return type_;
+}
+
 // ----------------------------------------------------------------------
 // Floating point class
 
 template <typename TYPE>
 FloatingArray<TYPE>::FloatingArray(int64_t length, const std::shared_ptr<Buffer>& data)
-    : NumericArray<TYPE>(TYPE::SINGLETON, length, data) {}
+    : NumericArray<TYPE>(TYPE::SINGLETON, length, data, nullptr) {}
 
 template <typename TYPE>
 int64_t FloatingArray<TYPE>::GetNullCount() {
@@ -92,7 +97,7 @@ IntegerArray<TYPE>::IntegerArray(int64_t length, const std::shared_ptr<Buffer>& 
 template <typename TYPE>
 IntegerArray<TYPE>::IntegerArray(int64_t length, const std::shared_ptr<Buffer>& data,
     const std::shared_ptr<Buffer>& valid_bits)
-    : NumericArray<TYPE>(TYPE::SINGLETON, length, data), valid_bits_(valid_bits) {}
+    : NumericArray<TYPE>(TYPE::SINGLETON, length, data, valid_bits) {}
 
 template <typename TYPE>
 int64_t IntegerArray<TYPE>::GetNullCount() {
@@ -185,6 +190,7 @@ template class IntegerArray<Int32Type>;
 template class IntegerArray<UInt64Type>;
 template class IntegerArray<Int64Type>;
 
+template class NumericArray<BooleanType>;
 template class NumericArray<FloatType>;
 template class NumericArray<DoubleType>;
 template class FloatingArray<FloatType>;
@@ -195,7 +201,7 @@ template class FloatingArray<DoubleType>;
 
 BooleanArray::BooleanArray(int64_t length, const std::shared_ptr<Buffer>& data,
     const std::shared_ptr<Buffer>& valid_bits)
-    : UInt8Array(length, data, valid_bits) {
+    : IntegerArray<BooleanType>(length, data, valid_bits) {
   type_ = BooleanType::SINGLETON;
 }
 

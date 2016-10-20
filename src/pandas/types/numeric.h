@@ -15,18 +15,29 @@ template <typename TYPE>
 class PANDAS_EXPORT NumericArray : public Array {
  public:
   using T = typename TYPE::c_type;
+  using DataTypePtr = std::shared_ptr<TYPE>;
   using Array::Array;
 
-  NumericArray(const std::shared_ptr<DataType>& type, int64_t length,
-      const std::shared_ptr<Buffer>& data);
+  NumericArray(const DataTypePtr& type, int64_t length,
+      const std::shared_ptr<Buffer>& data, const std::shared_ptr<Buffer>& valid_bits);
 
   auto data() const -> const T*;
   auto mutable_data() const -> T*;
 
   std::shared_ptr<Buffer> data_buffer() const;
 
+  TypePtr type() const override;
+
+  // Despite being virtual, compiler could inline this if
+  // the call is performed with a NumericArray reference
+  const TYPE& type_reference() const override { return *type_; }
+
+  std::shared_ptr<Buffer> valid_bits() const;
+
  protected:
+  std::shared_ptr<TYPE> type_;
   std::shared_ptr<Buffer> data_;
+  std::shared_ptr<Buffer> valid_bits_;
 };
 
 template <typename TYPE>
@@ -45,10 +56,8 @@ class PANDAS_EXPORT IntegerArray : public NumericArray<TYPE> {
 
   bool owns_data() const override;
 
-  std::shared_ptr<Buffer> valid_buffer() const;
-
  protected:
-  std::shared_ptr<Buffer> valid_bits_;
+  using NumericArray<TYPE>::valid_bits_;
 };
 
 template <typename TYPE>
@@ -92,7 +101,7 @@ extern template class PANDAS_EXPORT IntegerArray<UInt64Type>;
 extern template class PANDAS_EXPORT FloatingArray<FloatType>;
 extern template class PANDAS_EXPORT FloatingArray<DoubleType>;
 
-class PANDAS_EXPORT BooleanArray : public UInt8Array {
+class PANDAS_EXPORT BooleanArray : public IntegerArray<BooleanType> {
  public:
   BooleanArray(int64_t length, const std::shared_ptr<Buffer>& data,
       const std::shared_ptr<Buffer>& valid_bits = nullptr);

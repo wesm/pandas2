@@ -57,7 +57,7 @@ class DataType {
 
   virtual std::string ToString() const = 0;
 
-  virtual bool Equals(const DataType& other) { return type_ == other.type_; }
+  virtual bool Equals(const DataType& other) const { return type_ == other.type_; }
 
   TypeId type() const { return type_; }
 
@@ -65,7 +65,7 @@ class DataType {
   TypeId type_;
 };
 
-typedef std::shared_ptr<DataType> TypePtr;
+using TypePtr = std::shared_ptr<const DataType>;
 
 class PANDAS_EXPORT TimestampType : public DataType {
  public:
@@ -92,6 +92,8 @@ class PANDAS_EXPORT PyObjectType : public DataType {
   static char const* name() { return "object"; }
 
   std::string ToString() const override;
+
+  static std::shared_ptr<PyObjectType> SINGLETON;
 };
 
 template <typename DERIVED, typename C_TYPE, DataType::TypeId TYPE_ID,
