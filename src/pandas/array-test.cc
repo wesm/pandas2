@@ -12,6 +12,7 @@
 #include "pandas/array.h"
 #include "pandas/common.h"
 #include "pandas/memory.h"
+#include "pandas/meta/typelist.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
 #include "pandas/types/numeric.h"

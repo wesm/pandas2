@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <mutex>
 
-#include "arrow/util/memory-pool.h"
+#include "arrow/memory_pool.h"
 #include "pandas/common.h"
 
 namespace pandas {

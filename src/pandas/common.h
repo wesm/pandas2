@@ -7,9 +7,9 @@
 #include <limits>
 #include <string>
 
+#include "arrow/buffer.h"
+#include "arrow/status.h"
 #include "arrow/util/bit-util.h"
-#include "arrow/util/buffer.h"
-#include "arrow/util/status.h"
 
 #include "pandas/visibility.h"
 
