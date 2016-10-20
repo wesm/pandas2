@@ -277,7 +277,7 @@ cdef Array wrap_array(const lp.ArrayPtr& arr):
 
 cdef PandasType wrap_type(const lp.TypePtr& sp_type):
     cdef:
-        lp.DataType* type = sp_type.get()
+        const lp.DataType* type = sp_type.get()
         PandasType result
 
     if type.type() == lp.TypeId_CATEGORY:

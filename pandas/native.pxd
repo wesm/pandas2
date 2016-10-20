@@ -74,7 +74,7 @@ cdef extern from "pandas/api.h" namespace "pandas":
         c_bool Equals(const DataType& other)
         string ToString()
 
-    ctypedef shared_ptr[DataType] TypePtr
+    ctypedef shared_ptr[const DataType] TypePtr
 
     cdef cppclass Int8Type(DataType):
         pass

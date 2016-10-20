@@ -41,4 +41,7 @@ constexpr const char* FloatType::NAME;
 constexpr const char* DoubleType::NAME;
 constexpr const char* BooleanType::NAME;
 
+std::shared_ptr<PyObjectType> PyObjectType::SINGLETON =
+        std::move(std::make_shared<PyObjectType>());
+
 }  // namespace pandas

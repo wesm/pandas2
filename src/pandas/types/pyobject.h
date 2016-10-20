@@ -30,7 +30,11 @@ class PANDAS_EXPORT PyObjectArray : public Array {
   PyObject** data() const;
   PyObject** mutable_data() const;
 
+  TypePtr type() const override;
+  const PyObjectType& type_reference() const override;
+
  protected:
+  std::shared_ptr<PyObjectType> type_;
   std::shared_ptr<Buffer> data_;
   std::shared_ptr<Buffer> valid_bits_;
 };

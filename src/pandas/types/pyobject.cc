@@ -12,7 +12,8 @@ namespace pandas {
 
 PyObjectArray::PyObjectArray(int64_t length, const std::shared_ptr<Buffer>& data,
     const std::shared_ptr<Buffer>& valid_bits)
-    : Array(get_type_singleton<PyObjectType>(), length),
+    : Array(length, 0),
+      type_(PyObjectType::SINGLETON),
       data_(data),
       valid_bits_(valid_bits) {}
 
@@ -57,6 +58,14 @@ PyObject** PyObjectArray::data() const {
 PyObject** PyObjectArray::mutable_data() const {
   // const PyObject** is unpleasant to work with
   return reinterpret_cast<PyObject**>(const_cast<uint8_t*>(data_->data()));
+}
+
+TypePtr PyObjectArray::type() const {
+  return type_;
+}
+
+const PyObjectType& PyObjectArray::type_reference() const {
+  return *type_;
 }
 
 }  // namespace pandas
