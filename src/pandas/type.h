@@ -32,10 +32,10 @@ class DataType {
     BOOL = 9,
 
     // 4-byte floating point value
-    FLOAT = 10,
+    FLOAT32 = 10,
 
     // 8-byte floating point value
-    DOUBLE = 11,
+    FLOAT64 = 11,
 
     // PyObject*
     PYOBJECT = 12,
@@ -94,72 +94,96 @@ class PANDAS_EXPORT PyObjectType : public DataType {
   std::string ToString() const override;
 };
 
-template <typename Derived>
-class PANDAS_EXPORT PrimitiveType : public DataType {
+template <typename DERIVED, typename C_TYPE, DataType::TypeId TYPE_ID,
+    std::size_t SIZE = sizeof(C_TYPE)>
+class PANDAS_EXPORT NumericType : public DataType {
  public:
-  PrimitiveType() : DataType(Derived::type_enum) {}
+  using c_type = C_TYPE;
+  static constexpr DataType::TypeId type_id = TYPE_ID;
+  static constexpr size_t size = SIZE;
 
-  std::string ToString() const override {
-    return std::string(static_cast<const Derived*>(this)->name());
-  }
+  NumericType() : DataType(type_id) {}
+
+  std::string ToString() const override { return std::string(DERIVED::NAME); }
+
+  static std::shared_ptr<DERIVED> SINGLETON;
 };
 
-#define PRIMITIVE_DECL(TYPENAME, C_TYPE, ENUM, SIZE, NAME)      \
- public:                                                        \
-  typedef C_TYPE c_type;                                        \
-  static constexpr DataType::TypeId type_enum = DataType::ENUM; \
-  static constexpr size_t size = SIZE;                          \
-                                                                \
-  explicit TYPENAME() : PrimitiveType<TYPENAME>() {}            \
-                                                                \
-  static const char* name() { return NAME; }
+template <typename DERIVED, typename C_TYPE, DataType::TypeId TYPE_ID, std::size_t SIZE>
+std::shared_ptr<DERIVED> NumericType<DERIVED, C_TYPE, TYPE_ID, SIZE>::SINGLETON(
+    std::move(std::make_shared<DERIVED>()));
 
-class PANDAS_EXPORT NullType : public PrimitiveType<NullType> {
-  PRIMITIVE_DECL(NullType, void, NA, 0, "null");
+class PANDAS_EXPORT NullType : public DataType {
+ public:
+  NullType() : DataType(DataType::TypeId::NA) {}
+
+  std::string ToString() const override { return std::string("null"); }
 };
 
-class PANDAS_EXPORT UInt8Type : public PrimitiveType<UInt8Type> {
-  PRIMITIVE_DECL(UInt8Type, uint8_t, UINT8, 1, "uint8");
+class PANDAS_EXPORT UInt8Type
+    : public NumericType<UInt8Type, std::uint8_t, DataType::TypeId::UINT8> {
+ public:
+  constexpr static const char* NAME = "uint8";
 };
 
-class PANDAS_EXPORT Int8Type : public PrimitiveType<Int8Type> {
-  PRIMITIVE_DECL(Int8Type, int8_t, INT8, 1, "int8");
+class PANDAS_EXPORT Int8Type
+    : public NumericType<Int8Type, std::int8_t, DataType::TypeId::INT8> {
+ public:
+  constexpr static const char* NAME = "int8";
 };
 
-class PANDAS_EXPORT UInt16Type : public PrimitiveType<UInt16Type> {
-  PRIMITIVE_DECL(UInt16Type, uint16_t, UINT16, 2, "uint16");
+class PANDAS_EXPORT UInt16Type
+    : public NumericType<UInt16Type, std::uint16_t, DataType::TypeId::UINT16> {
+ public:
+  constexpr static const char* NAME = "uint16";
 };
 
-class PANDAS_EXPORT Int16Type : public PrimitiveType<Int16Type> {
-  PRIMITIVE_DECL(Int16Type, int16_t, INT16, 2, "int16");
+class PANDAS_EXPORT Int16Type
+    : public NumericType<Int16Type, std::int16_t, DataType::TypeId::INT16> {
+ public:
+  constexpr static const char* NAME = "int16";
 };
 
-class PANDAS_EXPORT UInt32Type : public PrimitiveType<UInt32Type> {
-  PRIMITIVE_DECL(UInt32Type, uint32_t, UINT32, 4, "uint32");
+class PANDAS_EXPORT UInt32Type
+    : public NumericType<UInt32Type, std::uint32_t, DataType::TypeId::UINT32> {
+ public:
+  constexpr static const char* NAME = "uint32";
 };
 
-class PANDAS_EXPORT Int32Type : public PrimitiveType<Int32Type> {
-  PRIMITIVE_DECL(Int32Type, int32_t, INT32, 4, "int32");
+class PANDAS_EXPORT Int32Type
+    : public NumericType<Int32Type, std::int32_t, DataType::TypeId::INT32> {
+ public:
+  constexpr static const char* NAME = "int32";
 };
 
-class PANDAS_EXPORT UInt64Type : public PrimitiveType<UInt64Type> {
-  PRIMITIVE_DECL(UInt64Type, uint64_t, UINT64, 8, "uint64");
+class PANDAS_EXPORT UInt64Type
+    : public NumericType<UInt64Type, std::uint64_t, DataType::TypeId::UINT64> {
+ public:
+  constexpr static const char* NAME = "uint64";
 };
 
-class PANDAS_EXPORT Int64Type : public PrimitiveType<Int64Type> {
-  PRIMITIVE_DECL(Int64Type, int64_t, INT64, 8, "int64");
+class PANDAS_EXPORT Int64Type
+    : public NumericType<Int64Type, std::int64_t, DataType::TypeId::INT64> {
+ public:
+  constexpr static const char* NAME = "int64";
 };
 
-class PANDAS_EXPORT FloatType : public PrimitiveType<FloatType> {
-  PRIMITIVE_DECL(FloatType, float, FLOAT, 4, "float");
+class PANDAS_EXPORT FloatType
+    : public NumericType<FloatType, float, DataType::TypeId::FLOAT32> {
+ public:
+  constexpr static const char* NAME = "float32";
 };
 
-class PANDAS_EXPORT DoubleType : public PrimitiveType<DoubleType> {
-  PRIMITIVE_DECL(DoubleType, double, DOUBLE, 8, "double");
+class PANDAS_EXPORT DoubleType
+    : public NumericType<DoubleType, double, DataType::TypeId::FLOAT64> {
+ public:
+  constexpr static const char* NAME = "float64";
 };
 
-class PANDAS_EXPORT BooleanType : public PrimitiveType<BooleanType> {
-  PRIMITIVE_DECL(BooleanType, uint8_t, BOOL, 1, "bool");
+class PANDAS_EXPORT BooleanType
+    : public NumericType<BooleanType, std::uint8_t, DataType::TypeId::BOOL> {
+ public:
+  constexpr static const char* NAME = "bool";
 };
 
 }  // namespace pandas

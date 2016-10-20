@@ -209,7 +209,7 @@ cdef class Array:
     cdef inline _getitem(self, size_t i):
         if i >= self.ap.length():
             raise IndexError('Out of bounds: %d' % i)
-        return self.ap.GetValue(i)
+        return self.ap.GetItem(i)
 
     def __setitem__(self, i, val):
         cdef:
@@ -226,7 +226,7 @@ cdef class Array:
     cdef inline _setitem(self, size_t i, object val):
         if i >= self.ap.length():
             raise IndexError('Out of bounds: %d' % i)
-        self.ap.SetValue(i, val)
+        self.ap.SetItem(i, val)
 
     def slice(self, start, end):
         pass
@@ -251,7 +251,7 @@ cdef class Float32Array(FloatingArray):
 
 cdef class BooleanArray(Array):
     cdef:
-        lp.cBooleanArray* inst
+        lp.CBooleanArray* inst
 
     cdef init(self, const ArrayPtr& arr):
         Array.init(self, arr)
@@ -265,7 +265,7 @@ cdef Array wrap_array(const lp.ArrayPtr& arr):
     cdef:
         Array result
 
-    if arr.get().type_enum() == lp.TypeId_CATEGORY:
+    if arr.get().type_id() == lp.TypeId_CATEGORY:
         result = CategoryArray()
     else:
         result = Array()
@@ -280,7 +280,7 @@ cdef PandasType wrap_type(const lp.TypePtr& sp_type):
         lp.DataType* type = sp_type.get()
         PandasType result
 
-    if type.type == lp.TypeId_CATEGORY:
+    if type.type() == lp.TypeId_CATEGORY:
         result = Category()
     else:
         result = PandasType()

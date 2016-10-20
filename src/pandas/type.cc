@@ -28,4 +28,17 @@ std::string TimestampType::ToString() const {
   return ss.str();
 }
 
+// Constexpr numeric type names
+constexpr const char* UInt8Type::NAME;
+constexpr const char* Int8Type::NAME;
+constexpr const char* UInt16Type::NAME;
+constexpr const char* Int16Type::NAME;
+constexpr const char* UInt32Type::NAME;
+constexpr const char* Int32Type::NAME;
+constexpr const char* UInt64Type::NAME;
+constexpr const char* Int64Type::NAME;
+constexpr const char* FloatType::NAME;
+constexpr const char* DoubleType::NAME;
+constexpr const char* BooleanType::NAME;
+
 }  // namespace pandas

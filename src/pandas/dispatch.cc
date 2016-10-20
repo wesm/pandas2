@@ -22,8 +22,8 @@ Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out) {
     MAKE_TYPE_CASE(DataType::UINT16, UInt16);
     MAKE_TYPE_CASE(DataType::UINT32, UInt32);
     MAKE_TYPE_CASE(DataType::UINT64, UInt64);
-    MAKE_TYPE_CASE(DataType::FLOAT, Float);
-    MAKE_TYPE_CASE(DataType::DOUBLE, Double);
+    MAKE_TYPE_CASE(DataType::FLOAT32, Float);
+    MAKE_TYPE_CASE(DataType::FLOAT64, Double);
     MAKE_TYPE_CASE(DataType::BOOL, Boolean);
     MAKE_TYPE_CASE(DataType::PYOBJECT, PyObject);
     default:
