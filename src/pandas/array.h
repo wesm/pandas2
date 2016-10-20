@@ -92,4 +92,6 @@ class ArrayView {
   int64_t length_;
 };
 
+using ArrayPtr = std::shared_ptr<Array>;
+
 }  // namespace pandas

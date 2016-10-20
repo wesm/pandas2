@@ -3,6 +3,7 @@
 
 #include "pandas/types/numeric.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -15,148 +16,122 @@
 
 namespace pandas {
 
-template <typename T>
-static inline std::shared_ptr<DataType> get_type_singleton() {
-  return nullptr;
+// ----------------------------------------------------------------------
+// Generic numeric class
+
+template <typename TYPE>
+NumericArray<TYPE>::NumericArray(
+    const DataTypePtr& type, int64_t length, const std::shared_ptr<Buffer>& data)
+    : Array(type, length), data_(data) {}
+
+template <typename TYPE>
+auto NumericArray<TYPE>::data() const -> const T* {
+  return reinterpret_cast<const T*>(data_->data());
 }
 
-#define MAKE_TYPE_SINGLETON(NAME)                                     \
-  static const auto k##NAME = std::make_shared<NAME##Type>();         \
-  template <>                                                         \
-  inline std::shared_ptr<DataType> get_type_singleton<NAME##Type>() { \
-    return k##NAME;                                                   \
-  }
-
-MAKE_TYPE_SINGLETON(Int8);
-MAKE_TYPE_SINGLETON(UInt8);
-MAKE_TYPE_SINGLETON(Int16);
-MAKE_TYPE_SINGLETON(UInt16);
-MAKE_TYPE_SINGLETON(Int32);
-MAKE_TYPE_SINGLETON(UInt32);
-MAKE_TYPE_SINGLETON(Int64);
-MAKE_TYPE_SINGLETON(UInt64);
-MAKE_TYPE_SINGLETON(Float);
-MAKE_TYPE_SINGLETON(Double);
+template <typename TYPE>
+auto NumericArray<TYPE>::mutable_data() const -> T* {
+  auto mutable_buf = static_cast<MutableBuffer*>(data_.get());
+  return reinterpret_cast<T*>(mutable_buf->mutable_data());
+}
 
 // ----------------------------------------------------------------------
-// Floating point base class
-
-FloatingArray::FloatingArray(
-    const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data)
-    : NumericArray(type, length), data_(data) {}
-
-// ----------------------------------------------------------------------
-// Specific implementations
+// Floating point class
 
 template <typename TYPE>
-FloatingArrayImpl<TYPE>::FloatingArrayImpl(
-    int64_t length, const std::shared_ptr<Buffer>& data)
-    : FloatingArray(get_type_singleton<TYPE>(), length, data) {}
+FloatingArray<TYPE>::FloatingArray(int64_t length, const std::shared_ptr<Buffer>& data)
+    : NumericArray<TYPE>(TYPE::SINGLETON, length, data) {}
 
 template <typename TYPE>
-int64_t FloatingArrayImpl<TYPE>::GetNullCount() {
+int64_t FloatingArray<TYPE>::GetNullCount() {
   // TODO(wesm)
   return 0;
 }
 
 template <typename TYPE>
-PyObject* FloatingArrayImpl<TYPE>::GetItem(int64_t i) {
+PyObject* FloatingArray<TYPE>::GetItem(int64_t i) {
   return NULL;
 }
 
 template <typename TYPE>
-Status FloatingArrayImpl<TYPE>::Copy(
+Status FloatingArray<TYPE>::Copy(
     int64_t offset, int64_t length, std::shared_ptr<Array>* out) const {
   size_t itemsize = sizeof(typename TYPE::c_type);
 
   std::shared_ptr<Buffer> copied_data;
 
-  RETURN_NOT_OK(data_->Copy(offset * itemsize, length * itemsize, &copied_data));
+  RETURN_NOT_OK(this->data_->Copy(offset * itemsize, length * itemsize, &copied_data));
 
-  *out = std::make_shared<FloatingArrayImpl<TYPE>>(length, copied_data);
+  *out = std::make_shared<FloatingArray<TYPE>>(length, copied_data);
   return Status::OK();
 }
 
 template <typename TYPE>
-Status FloatingArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
+Status FloatingArray<TYPE>::SetItem(int64_t i, PyObject* val) {
   return Status::OK();
 }
 
 template <typename TYPE>
-bool FloatingArrayImpl<TYPE>::owns_data() const {
-  return data_.use_count() == 1;
+bool FloatingArray<TYPE>::owns_data() const {
+  return this->data_.use_count() == 1;
 }
 
 // Instantiate templates
-template class FloatingArrayImpl<FloatType>;
-template class FloatingArrayImpl<DoubleType>;
+template class FloatingArray<FloatType>;
+template class FloatingArray<DoubleType>;
 
 // ----------------------------------------------------------------------
-// Any integer
-
-IntegerArray::IntegerArray(
-    const TypePtr type, int64_t length, const std::shared_ptr<Buffer>& data)
-    : NumericArray(type, length), data_(data), valid_bits_(nullptr) {}
-
-IntegerArray::IntegerArray(const TypePtr type, int64_t length,
-    const std::shared_ptr<Buffer>& data, const std::shared_ptr<Buffer>& valid_bits)
-    : NumericArray(type, length), data_(data), valid_bits_(valid_bits) {}
-
-int64_t IntegerArray::GetNullCount() {
-  // TODO(wesm)
-  // return nulls_.set_count();
-  return 0;
-}
+// Types integers
 
 // ----------------------------------------------------------------------
 // Typed integers
 
 template <typename TYPE>
-IntegerArrayImpl<TYPE>::IntegerArrayImpl(
-    int64_t length, const std::shared_ptr<Buffer>& data)
-    : IntegerArray(get_type_singleton<TYPE>(), length, data) {}
+IntegerArray<TYPE>::IntegerArray(int64_t length, const std::shared_ptr<Buffer>& data)
+    : IntegerArray(length, data, nullptr) {}
 
 template <typename TYPE>
-const typename TYPE::c_type* IntegerArrayImpl<TYPE>::data() const {
-  return reinterpret_cast<const T*>(data_->data());
+IntegerArray<TYPE>::IntegerArray(int64_t length, const std::shared_ptr<Buffer>& data,
+    const std::shared_ptr<Buffer>& valid_bits)
+    : NumericArray<TYPE>(TYPE::SINGLETON, length, data), valid_bits_(valid_bits) {}
+
+template <typename TYPE>
+int64_t IntegerArray<TYPE>::GetNullCount() {
+  // TODO(wesm)
+  // return nulls_.set_count();
+  return 0;
 }
 
 template <typename TYPE>
-typename TYPE::c_type* IntegerArrayImpl<TYPE>::mutable_data() const {
-  auto mutable_buf = static_cast<MutableBuffer*>(data_.get());
-  return reinterpret_cast<T*>(mutable_buf->mutable_data());
-}
-
-template <typename TYPE>
-PyObject* IntegerArrayImpl<TYPE>::GetItem(int64_t i) {
+PyObject* IntegerArray<TYPE>::GetItem(int64_t i) {
   if (valid_bits_ && BitUtil::BitNotSet(valid_bits_->data(), i)) {
     Py_INCREF(py::NA);
     return py::NA;
   }
-  return PyLong_FromLongLong(data()[i]);
+  return PyLong_FromLongLong(this->data()[i]);
 }
 
 template <typename TYPE>
-bool IntegerArrayImpl<TYPE>::owns_data() const {
-  bool owns_data = data_.use_count() == 1;
+bool IntegerArray<TYPE>::owns_data() const {
+  bool owns_data = this->data_.use_count() == 1;
   if (valid_bits_) { owns_data &= valid_bits_.use_count() == 1; }
   return owns_data;
 }
 
 template <typename TYPE>
-Status IntegerArrayImpl<TYPE>::Copy(
+Status IntegerArray<TYPE>::Copy(
     int64_t offset, int64_t length, std::shared_ptr<Array>* out) const {
   size_t itemsize = sizeof(typename TYPE::c_type);
 
   std::shared_ptr<Buffer> copied_data;
   std::shared_ptr<Buffer> copied_valid_bits;
 
-  RETURN_NOT_OK(data_->Copy(offset * itemsize, length * itemsize, &copied_data));
+  RETURN_NOT_OK(this->data_->Copy(offset * itemsize, length * itemsize, &copied_data));
 
   if (valid_bits_) {
-    RETURN_NOT_OK(CopyBitmap(data_, offset, length, &copied_valid_bits));
+    RETURN_NOT_OK(CopyBitmap(this->data_, offset, length, &copied_valid_bits));
   }
-  *out = std::make_shared<FloatingArrayImpl<TYPE>>(length, copied_data);
+  *out = std::make_shared<FloatingArray<TYPE>>(length, copied_data);
   return Status::OK();
 }
 
@@ -170,8 +145,8 @@ static Status PyObjectToInt64(PyObject* obj, int64_t* out) {
 }
 
 template <typename TYPE>
-Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
-  if (!data_->is_mutable()) {
+Status IntegerArray<TYPE>::SetItem(int64_t i, PyObject* val) {
+  if (!this->data_->is_mutable()) {
     // TODO(wesm): copy-on-write?
     return Status::Invalid("Underlying buffer is immutable");
   }
@@ -184,7 +159,7 @@ Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
   if (py::is_na(val)) {
     if (!valid_bits_) {
       // TODO: raise Python exception on error status
-      RETURN_NOT_OK(AllocateValidityBitmap(length_, &valid_bits_));
+      RETURN_NOT_OK(AllocateValidityBitmap(this->length_, &valid_bits_));
     }
     auto mutable_bits = static_cast<MutableBuffer*>(valid_bits_.get())->mutable_data();
     BitUtil::ClearBit(mutable_bits, i);
@@ -195,20 +170,20 @@ Status IntegerArrayImpl<TYPE>::SetItem(int64_t i, PyObject* val) {
     RETURN_NOT_OK(PyObjectToInt64(val, &cval));
 
     // Overflow issues
-    mutable_data()[i] = cval;
+    this->mutable_data()[i] = cval;
   }
   RETURN_IF_PYERROR();
   return Status::OK();
 }
 
 // Instantiate templates
-template class IntegerArrayImpl<UInt8Type>;
-template class IntegerArrayImpl<Int8Type>;
-template class IntegerArrayImpl<UInt16Type>;
-template class IntegerArrayImpl<Int16Type>;
-template class IntegerArrayImpl<UInt32Type>;
-template class IntegerArrayImpl<Int32Type>;
-template class IntegerArrayImpl<UInt64Type>;
-template class IntegerArrayImpl<Int64Type>;
+template class IntegerArray<UInt8Type>;
+template class IntegerArray<Int8Type>;
+template class IntegerArray<UInt16Type>;
+template class IntegerArray<Int16Type>;
+template class IntegerArray<UInt32Type>;
+template class IntegerArray<Int32Type>;
+template class IntegerArray<UInt64Type>;
+template class IntegerArray<Int64Type>;
 
 }  // namespace pandas

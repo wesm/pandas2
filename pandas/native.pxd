@@ -27,7 +27,7 @@ cdef extern from "<iostream>":
     pass
 
 
-cdef extern from "pandas/status.h" namespace "pandas" nogil:
+cdef extern from "pandas/common.h" namespace "pandas" nogil:
 
     # We can later add more of the common status factory methods as needed
     cdef Status Status_OK "Status::OK"()
@@ -44,28 +44,30 @@ cdef extern from "pandas/status.h" namespace "pandas" nogil:
         c_bool IsUnknownError()
         c_bool IsNotImplemented()
 
-cdef extern from "pandas/api.h" namespace "pandas":
+cdef extern from "pandas/api.h" namespace "pandas::DataType":
 
     enum TypeId:
-        TypeId_NA " pandas::DataType::NA"
-        TypeId_UINT8 " pandas::DataType::UINT8"
-        TypeId_UINT16 " pandas::DataType::UINT16"
-        TypeId_UINT32 " pandas::DataType::UINT32"
-        TypeId_UINT64 " pandas::DataType::UINT64"
-        TypeId_INT8 " pandas::DataType::INT8"
-        TypeId_INT16 " pandas::DataType::INT16"
-        TypeId_INT32 " pandas::DataType::INT32"
-        TypeId_INT64 " pandas::DataType::INT64"
-        TypeId_BOOL " pandas::DataType::BOOL"
-        TypeId_FLOAT " pandas::DataType::FLOAT"
-        TypeId_DOUBLE " pandas::DataType::DOUBLE"
-        TypeId_PYOBJECT " pandas::DataType::PYOBJECT"
-        TypeId_CATEGORY " pandas::DataType::CATEGORY"
-        TypeId_TIMESTAMP " pandas::DataType::TIMESTAMP"
-        TypeId_TIMESTAMP_TZ " pandas::DataType::TIMESTAMP_TZ"
+        TypeId_NA " pandas::DataType::TypeId::NA"
+        TypeId_UINT8 " pandas::DataType::TypeId::UINT8"
+        TypeId_UINT16 " pandas::DataType::TypeId::UINT16"
+        TypeId_UINT32 " pandas::DataType::TypeId::UINT32"
+        TypeId_UINT64 " pandas::DataType::TypeId::UINT64"
+        TypeId_INT8 " pandas::DataType::TypeId::INT8"
+        TypeId_INT16 " pandas::DataType::TypeId::INT16"
+        TypeId_INT32 " pandas::DataType::TypeId::INT32"
+        TypeId_INT64 " pandas::DataType::TypeId::INT64"
+        TypeId_BOOL " pandas::DataType::TypeId::BOOL"
+        TypeId_FLOAT32 " pandas::DataType::TypeId::FLOAT32"
+        TypeId_FLOAT64 " pandas::DataType::TypeId::FLOAT64"
+        TypeId_PYOBJECT " pandas::DataType::TypeId::PYOBJECT"
+        TypeId_CATEGORY " pandas::DataType::TypeId::CATEGORY"
+        TypeId_TIMESTAMP " pandas::DataType::TypeId::TIMESTAMP"
+        TypeId_TIMESTAMP_TZ " pandas::DataType::TypeId::TIMESTAMP_TZ"
+
+cdef extern from "pandas/api.h" namespace "pandas":
 
     cdef cppclass DataType:
-        TypeId type
+        TypeId type()
 
         DataType()
 
@@ -116,8 +118,8 @@ cdef extern from "pandas/api.h" namespace "pandas":
         TypeId type_id()
         size_t length()
 
-        object GetValue(size_t i)
-        void SetValue(size_t i, object val)
+        object GetItem(size_t i)
+        void SetItem(size_t i, object val)
 
     cdef cppclass CCategoryArray" pandas::CategoryArray"(CArray):
         pass
