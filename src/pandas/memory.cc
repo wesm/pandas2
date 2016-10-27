@@ -35,23 +35,7 @@ Status AllocateAligned(int64_t size, uint8_t** out) {
 }
 }  // namespace
 
-class InternalMemoryPool : public MemoryPool {
- public:
-  InternalMemoryPool() : bytes_allocated_(0) {}
-  virtual ~InternalMemoryPool();
-
-  Status Allocate(int64_t size, uint8_t** out) override;
-
-  void Free(uint8_t* buffer, int64_t size) override;
-
-  int64_t bytes_allocated() const override;
-
- private:
-  mutable std::mutex pool_lock_;
-  int64_t bytes_allocated_;
-};
-
-Status InternalMemoryPool::Allocate(int64_t size, uint8_t** out) {
+Status PandasMemoryPool::Allocate(int64_t size, uint8_t** out) {
   std::lock_guard<std::mutex> guard(pool_lock_);
   RETURN_NOT_OK(AllocateAligned(size, out));
   bytes_allocated_ += size;
@@ -59,23 +43,23 @@ Status InternalMemoryPool::Allocate(int64_t size, uint8_t** out) {
   return Status::OK();
 }
 
-int64_t InternalMemoryPool::bytes_allocated() const {
+int64_t PandasMemoryPool::bytes_allocated() const {
   std::lock_guard<std::mutex> guard(pool_lock_);
   return bytes_allocated_;
 }
 
-void InternalMemoryPool::Free(uint8_t* buffer, int64_t size) {
+void PandasMemoryPool::Free(uint8_t* buffer, int64_t size) {
   std::lock_guard<std::mutex> guard(pool_lock_);
   PANDAS_DCHECK_GE(bytes_allocated_, size);
   std::free(buffer);
   bytes_allocated_ -= size;
 }
 
-InternalMemoryPool::~InternalMemoryPool() {}
+PandasMemoryPool::~PandasMemoryPool() {}
 
-MemoryPool* default_memory_pool() {
-  static InternalMemoryPool default_memory_pool_;
-  return &default_memory_pool_;
+MemoryPool* memory_pool() {
+  static PandasMemoryPool memory_pool_;
+  return &memory_pool_;
 }
 
 }  // namespace pandas

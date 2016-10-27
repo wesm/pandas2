@@ -15,14 +15,15 @@ template <typename TYPE>
 class PANDAS_EXPORT NumericArray : public Array {
  public:
   using T = typename TYPE::c_type;
-  using DataTypePtr = std::shared_ptr<TYPE>;
   using Array::Array;
 
-  NumericArray(
-      const DataTypePtr& type, int64_t length, const std::shared_ptr<Buffer>& data);
+  NumericArray(const std::shared_ptr<DataType>& type, int64_t length,
+      const std::shared_ptr<Buffer>& data);
 
   auto data() const -> const T*;
   auto mutable_data() const -> T*;
+
+  std::shared_ptr<Buffer> data_buffer() const;
 
  protected:
   std::shared_ptr<Buffer> data_;
@@ -44,7 +45,9 @@ class PANDAS_EXPORT IntegerArray : public NumericArray<TYPE> {
 
   bool owns_data() const override;
 
- private:
+  std::shared_ptr<Buffer> valid_buffer() const;
+
+ protected:
   std::shared_ptr<Buffer> valid_bits_;
 };
 
@@ -53,11 +56,11 @@ class PANDAS_EXPORT FloatingArray : public NumericArray<TYPE> {
  public:
   FloatingArray(int64_t length, const std::shared_ptr<Buffer>& data);
 
+  int64_t GetNullCount() override;
   Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const override;
+
   PyObject* GetItem(int64_t i) override;
   Status SetItem(int64_t i, PyObject* val) override;
-
-  int64_t GetNullCount() override;
 
   bool owns_data() const override;
 };
@@ -88,5 +91,14 @@ extern template class PANDAS_EXPORT IntegerArray<Int64Type>;
 extern template class PANDAS_EXPORT IntegerArray<UInt64Type>;
 extern template class PANDAS_EXPORT FloatingArray<FloatType>;
 extern template class PANDAS_EXPORT FloatingArray<DoubleType>;
+
+class PANDAS_EXPORT BooleanArray : public UInt8Array {
+ public:
+  BooleanArray(int64_t length, const std::shared_ptr<Buffer>& data,
+      const std::shared_ptr<Buffer>& valid_bits = nullptr);
+
+  PyObject* GetItem(int64_t i) override;
+  Status SetItem(int64_t i, PyObject* val) override;
+};
 
 }  // namespace pandas

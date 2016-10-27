@@ -12,6 +12,7 @@
 #include "pandas/memory.h"
 #include "pandas/pytypes.h"
 #include "pandas/type.h"
+#include "pandas/type_traits.h"
 #include "pandas/types/common.h"
 
 namespace pandas {
@@ -20,8 +21,8 @@ namespace pandas {
 // Generic numeric class
 
 template <typename TYPE>
-NumericArray<TYPE>::NumericArray(
-    const DataTypePtr& type, int64_t length, const std::shared_ptr<Buffer>& data)
+NumericArray<TYPE>::NumericArray(const std::shared_ptr<DataType>& type, int64_t length,
+    const std::shared_ptr<Buffer>& data)
     : Array(type, length), data_(data) {}
 
 template <typename TYPE>
@@ -33,6 +34,11 @@ template <typename TYPE>
 auto NumericArray<TYPE>::mutable_data() const -> T* {
   auto mutable_buf = static_cast<MutableBuffer*>(data_.get());
   return reinterpret_cast<T*>(mutable_buf->mutable_data());
+}
+
+template <typename TYPE>
+std::shared_ptr<Buffer> NumericArray<TYPE>::data_buffer() const {
+  return data_;
 }
 
 // ----------------------------------------------------------------------
@@ -75,13 +81,6 @@ template <typename TYPE>
 bool FloatingArray<TYPE>::owns_data() const {
   return this->data_.use_count() == 1;
 }
-
-// Instantiate templates
-template class FloatingArray<FloatType>;
-template class FloatingArray<DoubleType>;
-
-// ----------------------------------------------------------------------
-// Types integers
 
 // ----------------------------------------------------------------------
 // Typed integers
@@ -131,7 +130,7 @@ Status IntegerArray<TYPE>::Copy(
   if (valid_bits_) {
     RETURN_NOT_OK(CopyBitmap(this->data_, offset, length, &copied_valid_bits));
   }
-  *out = std::make_shared<FloatingArray<TYPE>>(length, copied_data);
+  *out = std::make_shared<IntegerArray<TYPE>>(length, copied_data);
   return Status::OK();
 }
 
@@ -185,5 +184,62 @@ template class IntegerArray<UInt32Type>;
 template class IntegerArray<Int32Type>;
 template class IntegerArray<UInt64Type>;
 template class IntegerArray<Int64Type>;
+
+template class NumericArray<FloatType>;
+template class NumericArray<DoubleType>;
+template class FloatingArray<FloatType>;
+template class FloatingArray<DoubleType>;
+
+// ----------------------------------------------------------------------
+// Implement Boolean as subclass of UInt8
+
+BooleanArray::BooleanArray(int64_t length, const std::shared_ptr<Buffer>& data,
+    const std::shared_ptr<Buffer>& valid_bits)
+    : UInt8Array(length, data, valid_bits) {
+  type_ = BooleanType::SINGLETON;
+}
+
+PyObject* BooleanArray::GetItem(int64_t i) {
+  if (valid_bits_ && BitUtil::BitNotSet(valid_bits_->data(), i)) {
+    Py_INCREF(py::NA);
+    return py::NA;
+  }
+  if (data()[i] > 0) {
+    Py_RETURN_TRUE;
+  } else {
+    Py_RETURN_FALSE;
+  }
+}
+
+Status BooleanArray::SetItem(int64_t i, PyObject* val) {
+  if (!data_->is_mutable()) {
+    // TODO(wesm): copy-on-write?
+    return Status::Invalid("Underlying buffer is immutable");
+  }
+
+  if (!valid_bits_->is_mutable()) {
+    // TODO(wesm): copy-on-write?
+    return Status::Invalid("Valid bits buffer is immutable");
+  }
+
+  if (py::is_na(val)) {
+    if (!valid_bits_) {
+      // TODO: raise Python exception on error status
+      RETURN_NOT_OK(AllocateValidityBitmap(length_, &valid_bits_));
+    }
+    auto mutable_bits = static_cast<MutableBuffer*>(valid_bits_.get())->mutable_data();
+    BitUtil::ClearBit(mutable_bits, i);
+  } else {
+    auto mutable_bits = static_cast<MutableBuffer*>(valid_bits_.get())->mutable_data();
+    if (valid_bits_) { BitUtil::SetBit(mutable_bits, i); }
+    int64_t cval;
+    RETURN_NOT_OK(PyObjectToInt64(val, &cval));
+
+    // Overflow issues
+    mutable_data()[i] = cval;
+  }
+  RETURN_IF_PYERROR();
+  return Status::OK();
+}
 
 }  // namespace pandas
