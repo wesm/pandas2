@@ -74,7 +74,14 @@ endif()
 #     GCC cannot always verify whether strict aliasing rules are indeed followed due to
 #     fundamental limitations in escape analysis, which can result in subtle bad code generation.
 #     This has a small perf hit but worth it to avoid hard to debug crashes.
-set(CXX_COMMON_FLAGS "-std=c++11 -fno-strict-aliasing -msse4.2 -Wall -Wno-sign-compare -Wno-deprecated -pthread -D__STDC_FORMAT_MACROS")
+set(CXX_COMMON_FLAGS "-std=c++11 -fno-strict-aliasing -Wno-deprecated -Wall")
+
+if (APPLE)
+  # Depending on the default OSX_DEPLOYMENT_TARGET (< 10.9), libstdc++ may be
+  # the default standard library which does not support C++11. libc++ is the
+  # default from 10.9 onward.
+  set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} -stdlib=libc++")
+endif()
 
 # compiler flags for different build types (run 'cmake -DCMAKE_BUILD_TYPE=<type> .')
 # For all builds:
@@ -118,18 +125,20 @@ endif ()
 # Set compile flags based on the build type.
 message("Configured for ${CMAKE_BUILD_TYPE} build (set with cmake -DCMAKE_BUILD_TYPE={release,debug,...})")
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
-  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_DEBUG})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_DEBUG}")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "FASTDEBUG")
-  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_FASTDEBUG})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_FASTDEBUG}")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
-  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_RELEASE})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_RELEASE}")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "PROFILE_GEN")
-  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_PROFILE_GEN})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_PROFILE_GEN}")
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "PROFILE_BUILD")
-  set(CMAKE_CXX_FLAGS ${CXX_FLAGS_PROFILE_BUILD})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_PROFILE_BUILD}")
 else()
   message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
 endif ()
+
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 
 # Add common flags
 set(CMAKE_CXX_FLAGS "${CXX_COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -144,10 +153,7 @@ if ("${COMPILER_FAMILY}" STREQUAL "clang")
   #   http://petereisentraut.blogspot.com/2011/05/ccache-and-clang.html
   #   http://petereisentraut.blogspot.com/2011/09/ccache-and-clang-part-2.html
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-unused-function -Wno-error")
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CLANG_OPTIONS}")
 endif()
 
 # Sanity check linking option.
@@ -646,17 +652,19 @@ add_subdirectory(src/pandas/util)
 
 set(PANDAS_SRCS
   src/pandas/array.cc
+  src/pandas/common.cc
   src/pandas/dispatch.cc
   src/pandas/init.cc
   src/pandas/memory.cc
   src/pandas/numpy_interop.cc
   src/pandas/pytypes.cc
   src/pandas/type.cc
+  src/pandas/type_traits.cc
 
-  src/pandas/types/boolean.cc
   src/pandas/types/common.cc
   src/pandas/types/category.cc
   src/pandas/types/numeric.cc
+  src/pandas/types/pyobject.cc
 )
 
 add_library(pandas SHARED

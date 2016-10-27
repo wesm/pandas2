@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "pandas/config.h"
+
+#include <cstdint>
+#include <limits>
 #include <string>
 
 #include "arrow/util/bit-util.h"
@@ -10,7 +14,6 @@
 #include "arrow/util/memory-pool.h"
 #include "arrow/util/status.h"
 
-#include "pandas/config.h"
 #include "pandas/visibility.h"
 
 namespace pandas {
@@ -32,6 +35,9 @@ class OwnedRef {
 
   explicit OwnedRef(PyObject* obj) : obj_(obj) {}
 
+  template <typename T>
+  explicit OwnedRef(T* obj) : OwnedRef(reinterpret_cast<PyObject*>(obj)) {}
+
   ~OwnedRef() { Py_XDECREF(obj_); }
 
   void reset(PyObject* obj) {
@@ -39,9 +45,13 @@ class OwnedRef {
     obj_ = obj;
   }
 
-  void release() { obj_ = nullptr; }
+  PyObject* release() {
+    PyObject* ret = obj_;
+    obj_ = nullptr;
+    return ret;
+  }
 
-  PyObject* obj() const { return obj_; }
+  PyObject* get() const { return obj_; }
 
  private:
   PyObject* obj_;
@@ -75,17 +85,11 @@ class PyAcquireGIL {
 };
 
 // TODO(wesm): We can just let errors pass through. To be explored later
-#define RETURN_IF_PYERROR()                         \
-  if (PyErr_Occurred()) {                           \
-    PyObject *exc_type, *exc_value, *traceback;     \
-    PyErr_Fetch(&exc_type, &exc_value, &traceback); \
-    PyObjectStringify stringified(exc_value);       \
-    std::string message(stringified.bytes);         \
-    Py_XDECREF(exc_type);                           \
-    Py_XDECREF(exc_value);                          \
-    Py_XDECREF(traceback);                          \
-    PyErr_Clear();                                  \
-    return Status::UnknownError(message);           \
-  }
+Status GetPythonError();
+
+#define RETURN_IF_PYERROR() \
+  if (PyErr_Occurred()) { return GetPythonError(); }
+
+constexpr size_t kMemoryAlignment = 64;
 
 }  // namespace pandas

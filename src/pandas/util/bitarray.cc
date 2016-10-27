@@ -6,7 +6,6 @@
 #include <new>
 
 #include "pandas/common.h"
-#include "pandas/util.h"
 
 namespace pandas {
 
@@ -15,7 +14,7 @@ BitArray::~BitArray() {
 }
 
 Status BitArray::Init(size_t length) {
-  size_t bufsize = util::ceil_byte(length / 8);
+  size_t bufsize = BitUtil::CeilByte(length / 8);
   try {
     bits_ = new uint8_t[bufsize];
     memset(bits_, 0, bufsize);

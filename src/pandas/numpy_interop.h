@@ -1,8 +1,7 @@
 // This file is a part of pandas. See LICENSE for details about reuse and
 // copyright holders
 
-#ifndef PANDAS_NUMPY_INTEROP_H
-#define PANDAS_NUMPY_INTEROP_H
+#pragma once
 
 #include <Python.h>
 
@@ -45,37 +44,24 @@ inline int import_numpy() {
   return 0;
 }
 
-Status numpy_type_num_to_pandas(int type_num, DataType::TypeId* pandas_type);
+Status PandasTypeFromNumPy(PyArray_Descr* dtype, std::shared_ptr<DataType>* type);
 
-Status array_from_numpy(PyObject* arr, Array** out);
-Status array_from_masked_numpy(PyObject* arr, PyObject* mask, Array** out);
+// These are zero-copy if the data is contiguous (not strided)
+Status CreateArrayFromNumPy(PyArrayObject* arr, std::shared_ptr<Array>* out);
+Status CreateArrayFromMaskedNumPy(
+    PyArrayObject* arr, PyArrayObject* mask, std::shared_ptr<Array>* out);
 
 // Container for strided (but contiguous) data contained in a NumPy array
-class NumPyBuffer {
+class NumPyBuffer : public MutableBuffer {
  public:
-  NumPyBuffer() : arr_(nullptr) {}
+  NumPyBuffer(PyArrayObject* arr);
   virtual ~NumPyBuffer();
-  Status Init(PyObject* arr);
 
-  size_t size();
-  int stride();
-
-  PyArrayObject* array() { return reinterpret_cast<PyArrayObject*>(arr_); }
-
+  PyArrayObject* array() const { return reinterpret_cast<PyArrayObject*>(arr_); }
   PyArray_Descr* dtype() { return PyArray_DESCR(array()); }
 
-  char* item(size_t i) {
-    char* data = reinterpret_cast<char*>(PyArray_DATA(array()));
-    return data + i * (PyArray_STRIDE(array(), 0));
-  }
-
-  PyObject* GetItem(size_t i);
-  void PySetItem(size_t i, PyObject* val);
-
  protected:
-  PyObject* arr_;
+  PyArrayObject* arr_;
 };
 
 }  // namespace pandas
-
-#endif  // PANDAS_NUMPY_INTEROP_H
