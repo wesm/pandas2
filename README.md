@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/pydata/pandas/blob/master/doc/logo/pandas_logo.png"><br>
+  <img src="https://github.com/pandas-dev/pandas/blob/master/doc/logo/pandas_logo.png"><br>
 </div>
 
 -----------------
@@ -25,8 +25,8 @@
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.org/pydata/pandas">
-    <img src="https://travis-ci.org/pydata/pandas.svg?branch=master" alt="travis build status" />
+    <a href="https://travis-ci.org/pandas-dev/pandas2">
+    <img src="https://travis-ci.org/pandas-dev/pandas2.svg?branch=master" alt="travis build status" />
     </a>
   </td>
 </tr>
