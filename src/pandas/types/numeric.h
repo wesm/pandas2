@@ -3,13 +3,27 @@
 
 #pragma once
 
-#include "pandas/config.h"
-
 #include "pandas/array.h"
 #include "pandas/common.h"
 #include "pandas/type.h"
 
 namespace pandas {
+
+template <typename TYPE>
+class PANDAS_EXPORT NumericScalar : public Scalar {
+ public:
+  using TypeClass = TYPE;
+  using T = typename TYPE::c_type;
+  using Scalar::Scalar;
+
+  NumericScalar(T value, bool is_null)
+      : Scalar(TYPE::SINGLETON, is_null), value_(value) {}
+
+  T value() const { return value_; }
+
+ protected:
+  T value_;
+};
 
 template <typename TYPE>
 class PANDAS_EXPORT NumericArray : public Array {
@@ -26,11 +40,9 @@ class PANDAS_EXPORT NumericArray : public Array {
 
   std::shared_ptr<Buffer> data_buffer() const;
 
-  TypePtr type() const override;
-
   // Despite being virtual, compiler could inline this if
   // the call is performed with a NumericArray reference
-  const TYPE& type_reference() const override { return *type_; }
+  const TYPE& type_reference() const override;
 
   std::shared_ptr<Buffer> valid_bits() const;
 
@@ -51,9 +63,6 @@ class PANDAS_EXPORT IntegerArray : public NumericArray<TYPE> {
 
   Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const override;
 
-  PyObject* GetItem(int64_t i) override;
-  Status SetItem(int64_t i, PyObject* val) override;
-
   bool owns_data() const override;
 
  protected:
@@ -68,11 +77,19 @@ class PANDAS_EXPORT FloatingArray : public NumericArray<TYPE> {
   int64_t GetNullCount() override;
   Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const override;
 
-  PyObject* GetItem(int64_t i) override;
-  Status SetItem(int64_t i, PyObject* val) override;
-
   bool owns_data() const override;
 };
+
+using FloatScalar = NumericScalar<FloatType>;
+using DoubleScalar = NumericScalar<DoubleType>;
+using Int8Scalar = NumericScalar<Int8Type>;
+using UInt8Scalar = NumericScalar<UInt8Type>;
+using Int16Scalar = NumericScalar<Int16Type>;
+using UInt16Scalar = NumericScalar<UInt16Type>;
+using Int32Scalar = NumericScalar<Int32Type>;
+using UInt32Scalar = NumericScalar<UInt32Type>;
+using Int64Scalar = NumericScalar<Int64Type>;
+using UInt64Scalar = NumericScalar<UInt64Type>;
 
 using FloatArray = FloatingArray<FloatType>;
 using DoubleArray = FloatingArray<DoubleType>;
@@ -106,8 +123,8 @@ class PANDAS_EXPORT BooleanArray : public IntegerArray<BooleanType> {
   BooleanArray(int64_t length, const std::shared_ptr<Buffer>& data,
       const std::shared_ptr<Buffer>& valid_bits = nullptr);
 
-  PyObject* GetItem(int64_t i) override;
-  Status SetItem(int64_t i, PyObject* val) override;
+  // PyObject* GetItem(int64_t i) override;
+  // Status SetItem(int64_t i, PyObject* val) override;
 };
 
 }  // namespace pandas

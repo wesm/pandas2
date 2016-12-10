@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "pandas/config.h"
-
 #include <sstream>
 #include <string>
 
@@ -13,22 +11,6 @@
 #include "pandas/type.h"
 
 namespace pandas {
-
-struct CategoryType : public DataType {
-  explicit CategoryType(const std::shared_ptr<Array>& categories)
-      : DataType(DataType::CATEGORY), categories_(categories) {}
-
-  std::string ToString() const override;
-
-  std::shared_ptr<const DataType> category_type() const {
-    return categories_->type();
-  }
-
-  std::shared_ptr<Array> categories() const { return categories_; }
-
- protected:
-  std::shared_ptr<Array> categories_;
-};
 
 class CategoryArray : public Array {
  public:

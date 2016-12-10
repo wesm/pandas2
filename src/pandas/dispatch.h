@@ -8,6 +8,6 @@
 
 namespace pandas {
 
-Status primitive_type_from_enum(DataType::TypeId tp_enum, DataType** out);
+Status primitive_type_from_enum(TypeId tp_enum, DataType** out);
 
 }  // namespace pandas

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <Python.h>
+
 #include "pandas/array.h"
 #include "pandas/common.h"
 #include "pandas/type.h"
@@ -18,10 +20,10 @@ class PANDAS_EXPORT PyObjectArray : public Array {
   Status Copy(int64_t offset, int64_t length, std::shared_ptr<Array>* out) const override;
 
   // Returns a NEW reference
-  PyObject* GetItem(int64_t i) override;
+  // PyObject* GetItem(int64_t i) override;
 
   // Does not steal a reference
-  Status SetItem(int64_t i, PyObject* val) override;
+  // Status SetItem(int64_t i, PyObject* val) override;
 
   int64_t GetNullCount() override;
 
@@ -30,7 +32,6 @@ class PANDAS_EXPORT PyObjectArray : public Array {
   PyObject** data() const;
   PyObject** mutable_data() const;
 
-  TypePtr type() const override;
   const PyObjectType& type_reference() const override;
 
  protected:

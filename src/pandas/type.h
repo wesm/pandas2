@@ -12,44 +12,48 @@
 
 namespace pandas {
 
+class Array;
+
+enum class TypeId : char {
+  // A degenerate NULL type
+  NA = 0,
+
+  // Little-endian integer types
+  INT8 = 1,
+  INT16 = 2,
+  INT32 = 3,
+  INT64 = 4,
+
+  UINT8 = 5,
+  UINT16 = 6,
+  UINT32 = 7,
+  UINT64 = 8,
+
+  // A boolean value represented as 1 byte
+  BOOL = 9,
+
+  // 4-byte floating point value
+  FLOAT32 = 10,
+
+  // 8-byte floating point value
+  FLOAT64 = 11,
+
+  // PyObject*
+  PYOBJECT = 12,
+
+  // Timestamp types
+  TIMESTAMP = 13,
+  TIMESTAMP_TZ = 14,
+
+  // UTF8 variable-length string
+  STRING = 15,
+
+  // Categorical
+  CATEGORY = 16
+};
+
 class DataType {
  public:
-  enum TypeId {
-    // A degerate NULL type
-    NA = 0,
-
-    // Little-endian integer types
-    UINT8 = 1,
-    INT8 = 2,
-    UINT16 = 3,
-    INT16 = 4,
-    UINT32 = 5,
-    INT32 = 6,
-    UINT64 = 7,
-    INT64 = 8,
-
-    // A boolean value represented as 1 byte
-    BOOL = 9,
-
-    // 4-byte floating point value
-    FLOAT32 = 10,
-
-    // 8-byte floating point value
-    FLOAT64 = 11,
-
-    // PyObject*
-    PYOBJECT = 12,
-
-    // Timestamp types
-    TIMESTAMP = 13,
-    TIMESTAMP_TZ = 14,
-
-    // UTF8 variable-length string
-    STRING = 15,
-
-    // Categorical
-    CATEGORY = 16
-  };
 
   explicit DataType(TypeId type) : type_(type) {}
 
@@ -74,7 +78,7 @@ class PANDAS_EXPORT TimestampType : public DataType {
   Unit unit;
 
   explicit TimestampType(Unit unit = Unit::MICROSECOND)
-      : DataType(DataType::TIMESTAMP), unit(unit) {}
+      : DataType(TypeId::TIMESTAMP), unit(unit) {}
 
   TimestampType(const TimestampType& other) : TimestampType(other.unit) {}
 
@@ -85,7 +89,7 @@ class PANDAS_EXPORT TimestampType : public DataType {
 
 class PANDAS_EXPORT PyObjectType : public DataType {
  public:
-  PyObjectType() : DataType(DataType::PYOBJECT) {}
+  PyObjectType() : DataType(TypeId::PYOBJECT) {}
 
   PyObjectType(const PyObjectType& other) : PyObjectType() {}
 
@@ -96,13 +100,14 @@ class PANDAS_EXPORT PyObjectType : public DataType {
   static std::shared_ptr<PyObjectType> SINGLETON;
 };
 
-template <typename DERIVED, typename C_TYPE, DataType::TypeId TYPE_ID,
+template <typename DERIVED, typename C_TYPE, TypeId TYPE_ID,
     std::size_t SIZE = sizeof(C_TYPE)>
 class PANDAS_EXPORT NumericType : public DataType {
  public:
   using c_type = C_TYPE;
-  static constexpr DataType::TypeId type_id = TYPE_ID;
+  static constexpr TypeId type_id = TYPE_ID;
   static constexpr size_t size = SIZE;
+  static constexpr bool is_primitive = true;
 
   NumericType() : DataType(type_id) {}
 
@@ -111,81 +116,106 @@ class PANDAS_EXPORT NumericType : public DataType {
   static std::shared_ptr<DERIVED> SINGLETON;
 };
 
-template <typename DERIVED, typename C_TYPE, DataType::TypeId TYPE_ID, std::size_t SIZE>
+template <typename DERIVED, typename C_TYPE, TypeId TYPE_ID, std::size_t SIZE>
 std::shared_ptr<DERIVED> NumericType<DERIVED, C_TYPE, TYPE_ID, SIZE>::SINGLETON(
     std::move(std::make_shared<DERIVED>()));
 
 class PANDAS_EXPORT NullType : public DataType {
  public:
-  NullType() : DataType(DataType::TypeId::NA) {}
+  NullType() : DataType(TypeId::NA) {}
 
   std::string ToString() const override { return std::string("null"); }
 };
 
 class PANDAS_EXPORT UInt8Type
-    : public NumericType<UInt8Type, std::uint8_t, DataType::TypeId::UINT8> {
+    : public NumericType<UInt8Type, std::uint8_t, TypeId::UINT8> {
  public:
   constexpr static const char* NAME = "uint8";
 };
 
 class PANDAS_EXPORT Int8Type
-    : public NumericType<Int8Type, std::int8_t, DataType::TypeId::INT8> {
+    : public NumericType<Int8Type, std::int8_t, TypeId::INT8> {
  public:
   constexpr static const char* NAME = "int8";
 };
 
 class PANDAS_EXPORT UInt16Type
-    : public NumericType<UInt16Type, std::uint16_t, DataType::TypeId::UINT16> {
+    : public NumericType<UInt16Type, std::uint16_t, TypeId::UINT16> {
  public:
   constexpr static const char* NAME = "uint16";
 };
 
 class PANDAS_EXPORT Int16Type
-    : public NumericType<Int16Type, std::int16_t, DataType::TypeId::INT16> {
+    : public NumericType<Int16Type, std::int16_t, TypeId::INT16> {
  public:
   constexpr static const char* NAME = "int16";
 };
 
 class PANDAS_EXPORT UInt32Type
-    : public NumericType<UInt32Type, std::uint32_t, DataType::TypeId::UINT32> {
+    : public NumericType<UInt32Type, std::uint32_t, TypeId::UINT32> {
  public:
   constexpr static const char* NAME = "uint32";
 };
 
 class PANDAS_EXPORT Int32Type
-    : public NumericType<Int32Type, std::int32_t, DataType::TypeId::INT32> {
+    : public NumericType<Int32Type, std::int32_t, TypeId::INT32> {
  public:
   constexpr static const char* NAME = "int32";
 };
 
 class PANDAS_EXPORT UInt64Type
-    : public NumericType<UInt64Type, std::uint64_t, DataType::TypeId::UINT64> {
+    : public NumericType<UInt64Type, std::uint64_t, TypeId::UINT64> {
  public:
   constexpr static const char* NAME = "uint64";
 };
 
 class PANDAS_EXPORT Int64Type
-    : public NumericType<Int64Type, std::int64_t, DataType::TypeId::INT64> {
+    : public NumericType<Int64Type, std::int64_t, TypeId::INT64> {
  public:
   constexpr static const char* NAME = "int64";
 };
 
 class PANDAS_EXPORT FloatType
-    : public NumericType<FloatType, float, DataType::TypeId::FLOAT32> {
+    : public NumericType<FloatType, float, TypeId::FLOAT32> {
  public:
   constexpr static const char* NAME = "float32";
 };
 
 class PANDAS_EXPORT DoubleType
-    : public NumericType<DoubleType, double, DataType::TypeId::FLOAT64> {
+    : public NumericType<DoubleType, double, TypeId::FLOAT64> {
  public:
   constexpr static const char* NAME = "float64";
 };
 
 class PANDAS_EXPORT BooleanType
-    : public NumericType<BooleanType, std::uint8_t, DataType::TypeId::BOOL> {
+    : public NumericType<BooleanType, std::uint8_t, TypeId::BOOL> {
  public:
   constexpr static const char* NAME = "bool";
 };
+
+class PANDAS_EXPORT CategoryType : public DataType {
+ public:
+  explicit CategoryType(const std::shared_ptr<Array>& categories)
+      : DataType(TypeId::CATEGORY), categories_(categories) {}
+
+  std::string ToString() const override;
+  std::shared_ptr<const DataType> category_type() const;
+  std::shared_ptr<Array> categories() const { return categories_; }
+
+ protected:
+  std::shared_ptr<Array> categories_;
+};
+
+inline bool is_integer(TypeId type_id) {
+  return type_id >= TypeId::INT8 && type_id <= TypeId::UINT64;
+}
+
+inline bool is_signed_integer(TypeId type_id) {
+  return type_id >= TypeId::INT8 && type_id <= TypeId::INT64;
+}
+
+inline bool is_unsigned_integer(TypeId type_id) {
+  return type_id >= TypeId::UINT8 && type_id <= TypeId::UINT64;
+}
 
 }  // namespace pandas

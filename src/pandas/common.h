@@ -3,15 +3,12 @@
 
 #pragma once
 
-#include "pandas/config.h"
-
 #include <cstdint>
 #include <limits>
 #include <string>
 
 #include "arrow/util/bit-util.h"
 #include "arrow/util/buffer.h"
-#include "arrow/util/memory-pool.h"
 #include "arrow/util/status.h"
 
 #include "pandas/visibility.h"
@@ -24,71 +21,40 @@ namespace pandas {
 namespace BitUtil = arrow::BitUtil;
 using Buffer = arrow::Buffer;
 using MutableBuffer = arrow::MutableBuffer;
-using MemoryPool = arrow::MemoryPool;
 using ResizableBuffer = arrow::ResizableBuffer;
 using PoolBuffer = arrow::PoolBuffer;
 using Status = arrow::Status;
 
-class OwnedRef {
+// Bitmap utilities
+static constexpr uint8_t kBitmask[] = {1, 2, 4, 8, 16, 32, 64, 128};
+
+class BitmapWriter {
  public:
-  OwnedRef() : obj_(nullptr) {}
+  explicit BitmapWriter(uint8_t* bitmap) : bitmap_(bitmap), cycle_(0), zero_count_(0) {}
 
-  explicit OwnedRef(PyObject* obj) : obj_(obj) {}
-
-  template <typename T>
-  explicit OwnedRef(T* obj) : OwnedRef(reinterpret_cast<PyObject*>(obj)) {}
-
-  ~OwnedRef() { Py_XDECREF(obj_); }
-
-  void reset(PyObject* obj) {
-    if (obj_ != nullptr) { Py_XDECREF(obj_); }
-    obj_ = obj;
-  }
-
-  PyObject* release() {
-    PyObject* ret = obj_;
-    obj_ = nullptr;
-    return ret;
-  }
-
-  PyObject* get() const { return obj_; }
-
- private:
-  PyObject* obj_;
-};
-
-struct PyObjectStringify {
-  OwnedRef tmp_obj;
-  const char* bytes;
-
-  explicit PyObjectStringify(PyObject* obj) {
-    PyObject* bytes_obj;
-    if (PyUnicode_Check(obj)) {
-      bytes_obj = PyUnicode_AsUTF8String(obj);
-      tmp_obj.reset(bytes_obj);
-    } else {
-      bytes_obj = obj;
+  void CheckCycle() {
+    if (cycle_ == 8) {
+      ++bitmap_;
+      cycle_ = 0;
     }
-    bytes = PyBytes_AsString(bytes_obj);
   }
-};
 
-class PyAcquireGIL {
- public:
-  PyAcquireGIL() { state_ = PyGILState_Ensure(); }
+  void Set1() {
+    *bitmap_ |= kBitmask[cycle_++];
+    CheckCycle();
+  }
 
-  ~PyAcquireGIL() { PyGILState_Release(state_); }
+  void Set0() {
+    *bitmap_ &= ~kBitmask[cycle_++];
+    ++zero_count_;
+    CheckCycle();
+  }
 
  private:
-  PyGILState_STATE state_;
-  DISALLOW_COPY_AND_ASSIGN(PyAcquireGIL);
+  uint8_t* bitmap_;
+  int cycle_;
+  int64_t zero_count_;
 };
-
-// TODO(wesm): We can just let errors pass through. To be explored later
-Status GetPythonError();
-
-#define RETURN_IF_PYERROR() \
-  if (PyErr_Occurred()) { return GetPythonError(); }
 
 constexpr size_t kMemoryAlignment = 64;
 

@@ -648,18 +648,19 @@ set(PANDAS_TEST_LINK_LIBS ${PANDAS_MIN_TEST_LIBS})
 ############################################################
 
 add_subdirectory(src/pandas)
+add_subdirectory(src/pandas/kernels)
 add_subdirectory(src/pandas/util)
 
 set(PANDAS_SRCS
   src/pandas/array.cc
   src/pandas/common.cc
   src/pandas/dispatch.cc
+  src/pandas/expr.cc
   src/pandas/init.cc
   src/pandas/memory.cc
   src/pandas/numpy_interop.cc
   src/pandas/pytypes.cc
   src/pandas/type.cc
-  src/pandas/type_traits.cc
 
   src/pandas/types/common.cc
   src/pandas/types/category.cc

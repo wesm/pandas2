@@ -1,4 +1,3 @@
-
 // This file is a part of pandas. See LICENSE for details about reuse and
 // copyright holders
 
@@ -12,9 +11,9 @@
 #include "pandas/common.h"
 #include "pandas/memory.h"
 #include "pandas/numpy_interop.h"
+#include "pandas/pytypes.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
-#include "pandas/type_traits.h"
 #include "pandas/types/numeric.h"
 
 namespace pandas {
@@ -33,15 +32,15 @@ Status ContiguousFromNumPy(int type, int64_t length, std::shared_ptr<Array>* out
   return CreateArrayFromNumPy(np_arr, out);
 }
 
-void CheckNDArray(int npy_type_num, DataType::TypeId ex_type) {}
+void CheckNDArray(int npy_type_num, TypeId ex_type) {}
 
 static constexpr int kLength = 10;
 static constexpr int kNpyTypes[10] = {NPY_UINT8, NPY_INT8, NPY_UINT16, NPY_INT16,
     NPY_UINT32, NPY_INT32, NPY_UINT64, NPY_INT64, NPY_FLOAT, NPY_DOUBLE};
 
-static constexpr DataType::TypeId kPandasTypes[10] = {DataType::UINT8, DataType::INT8,
-    DataType::UINT16, DataType::INT16, DataType::UINT32, DataType::INT32,
-    DataType::UINT64, DataType::INT64, DataType::FLOAT32, DataType::FLOAT64};
+static constexpr TypeId kPandasTypes[10] = {TypeId::UINT8, TypeId::INT8,
+    TypeId::UINT16, TypeId::INT16, TypeId::UINT32, TypeId::INT32,
+    TypeId::UINT64, TypeId::INT64, TypeId::FLOAT32, TypeId::FLOAT64};
 
 TEST(TestNumPyInterop, TestMetadataBasics) {
   const int length = 50;

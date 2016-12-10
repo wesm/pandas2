@@ -10,7 +10,6 @@
 #include "pandas/common.h"
 #include "pandas/memory.h"
 #include "pandas/type.h"
-#include "pandas/type_traits.h"
 #include "pandas/types/numeric.h"
 #include "pandas/types/pyobject.h"
 

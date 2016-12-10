@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "pandas/config.h"
-
 #include <memory>
 #include <string>
 #include <vector>
@@ -25,8 +23,36 @@ struct ColumnStatistics {
   int64_t unique_count;
 };
 
-// Base class for physical array data structures.
-class Array {
+// A typed value, either scalar or array
+class Value {
+ public:
+  enum class Kind : char { SCALAR = 0, ARRAY = 1 };
+
+  Value(Kind kind, const std::shared_ptr<DataType>& type) : kind_(kind), type_(type) {}
+
+  Kind kind() const { return kind_; }
+  std::shared_ptr<DataType> type() const { return type_; }
+  TypeId type_id() const { return type_->type(); }
+
+ protected:
+  Kind kind_;
+  std::shared_ptr<DataType> type_;
+};
+
+// A value consisting of a single scalar element
+class Scalar : public Value {
+ public:
+  Scalar(const std::shared_ptr<DataType>& type, bool is_null)
+      : Value(Kind::SCALAR, type), is_null_(is_null) {}
+
+  bool is_null() const { return is_null_; }
+
+ protected:
+  bool is_null_;
+};
+
+// A value as a sequence of multiple homogeneously-typed elements
+class Array : public Value {
  public:
   virtual ~Array() {}
 
@@ -40,10 +66,8 @@ class Array {
   // would suffice, but the compiler cannot treat a shared_ptr
   // to a base class and a shared_ptr to a subclass as a
   // covariant return type.
-  virtual TypePtr type() const = 0;
+  std::shared_ptr<DataType> type() const { return type_; }
   virtual const DataType& type_reference() const = 0;
-
-  DataType::TypeId type_id() const { return type()->type(); }
 
   // Copy a section of the array into a new output array
   virtual Status Copy(
@@ -54,20 +78,17 @@ class Array {
 
   virtual int64_t GetNullCount() = 0;
 
-  virtual PyObject* GetItem(int64_t i) = 0;
-  virtual Status SetItem(int64_t i, PyObject* val) = 0;
-
   // For each array type, determine if all of its memory buffers belong to it
   // (for determining if they can be safely mutated). Otherwise, they may need
   // to be copied (for copy-on-write operations)
   virtual bool owns_data() const = 0;
 
  protected:
-  Array(int64_t length, int64_t offset) : length_(length), offset_(offset) {}
-
   int64_t length_;
   int64_t offset_;
-  // std::shared_ptr<Buffer> valid_bits_;
+
+  Array(const std::shared_ptr<DataType>& type, int64_t length, int64_t offset);
+  Array(const std::shared_ptr<DataType>& type, int64_t length);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Array);

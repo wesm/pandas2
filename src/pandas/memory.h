@@ -8,9 +8,12 @@
 #include <cstdint>
 #include <mutex>
 
+#include "arrow/util/memory-pool.h"
 #include "pandas/common.h"
 
 namespace pandas {
+
+using MemoryPool = arrow::MemoryPool;
 
 class PandasMemoryPool : public MemoryPool {
  public:

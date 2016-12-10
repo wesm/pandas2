@@ -7,6 +7,9 @@
 #include <sstream>
 #include <string>
 
+#include "pandas/array.h"
+#include "pandas/type.h"
+
 namespace pandas {
 
 // ----------------------------------------------------------------------
@@ -15,6 +18,9 @@ namespace pandas {
 std::string PyObjectType::ToString() const {
   return name();
 }
+
+std::shared_ptr<PyObjectType> PyObjectType::SINGLETON =
+    std::move(std::make_shared<PyObjectType>());
 
 // ----------------------------------------------------------------------
 // Timestamp
@@ -41,7 +47,8 @@ constexpr const char* FloatType::NAME;
 constexpr const char* DoubleType::NAME;
 constexpr const char* BooleanType::NAME;
 
-std::shared_ptr<PyObjectType> PyObjectType::SINGLETON =
-        std::move(std::make_shared<PyObjectType>());
+std::shared_ptr<const DataType> CategoryType::category_type() const {
+  return categories_->type();
+}
 
 }  // namespace pandas

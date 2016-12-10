@@ -40,7 +40,7 @@ class TestArray : public ::testing::Test {
 TEST_F(TestArray, Attrs) {
   DoubleType ex_type;
   ASSERT_TRUE(array_->type()->Equals(ex_type));
-  ASSERT_EQ(DataType::FLOAT64, array_->type_id());
+  ASSERT_EQ(TypeId::FLOAT64, array_->type_id());
 
   ASSERT_EQ(values_.size(), array_->length());
 }

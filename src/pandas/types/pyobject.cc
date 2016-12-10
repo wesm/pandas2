@@ -6,24 +6,18 @@
 #include <cstdint>
 
 #include "pandas/type.h"
-#include "pandas/type_traits.h"
 
 namespace pandas {
 
 PyObjectArray::PyObjectArray(int64_t length, const std::shared_ptr<Buffer>& data,
     const std::shared_ptr<Buffer>& valid_bits)
-    : Array(length, 0),
-      type_(PyObjectType::SINGLETON),
+    : Array(PyObjectType::SINGLETON, length, 0),
       data_(data),
       valid_bits_(valid_bits) {}
 
 int64_t PyObjectArray::GetNullCount() {
   // TODO(wesm)
   return 0;
-}
-
-PyObject* PyObjectArray::GetItem(int64_t i) {
-  return nullptr;
 }
 
 Status PyObjectArray::Copy(
@@ -42,10 +36,6 @@ Status PyObjectArray::Copy(
   return Status::OK();
 }
 
-Status PyObjectArray::SetItem(int64_t i, PyObject* val) {
-  return Status::OK();
-}
-
 bool PyObjectArray::owns_data() const {
   // TODO(wesm): Address Buffer-level data ownership
   return true;
@@ -60,12 +50,8 @@ PyObject** PyObjectArray::mutable_data() const {
   return reinterpret_cast<PyObject**>(const_cast<uint8_t*>(data_->data()));
 }
 
-TypePtr PyObjectArray::type() const {
-  return type_;
-}
-
 const PyObjectType& PyObjectArray::type_reference() const {
-  return *type_;
+  return dynamic_cast<const PyObjectType&>(*type_);
 }
 
 }  // namespace pandas
