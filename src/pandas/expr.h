@@ -9,12 +9,12 @@
 #include <string>
 #include <vector>
 
+#include "pandas/type.h"
 #include "pandas/visibility.h"
 
 namespace pandas {
 
 class Array;
-class DataType;
 class Operation;
 class Scalar;
 
@@ -36,6 +36,7 @@ class PANDAS_EXPORT ValueExpr : public Expr {
  public:
   using Expr::Expr;
   std::shared_ptr<DataType> type() const { return type_; }
+  TypeId type_id() const { return type_->type(); }
 
  protected:
   std::shared_ptr<DataType> type_;

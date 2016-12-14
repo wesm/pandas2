@@ -24,19 +24,19 @@ struct ColumnStatistics {
   int64_t unique_count;
 };
 
+enum class ValueKind : char { SCALAR = 0, ARRAY = 1, TABLE = 2 };
+
 // A typed value, either scalar or array
 class Value {
  public:
-  enum class Kind : char { SCALAR = 0, ARRAY = 1 };
+  Value(ValueKind kind, const std::shared_ptr<DataType>& type) : kind_(kind), type_(type) {}
 
-  Value(Kind kind, const std::shared_ptr<DataType>& type) : kind_(kind), type_(type) {}
-
-  Kind kind() const { return kind_; }
+  ValueKind kind() const { return kind_; }
   std::shared_ptr<DataType> type() const { return type_; }
   TypeId type_id() const { return type_->type(); }
 
  protected:
-  Kind kind_;
+  ValueKind kind_;
   std::shared_ptr<DataType> type_;
 };
 
@@ -44,7 +44,7 @@ class Value {
 class Scalar : public Value {
  public:
   Scalar(const std::shared_ptr<DataType>& type, bool is_null)
-      : Value(Kind::SCALAR, type), is_null_(is_null) {}
+      : Value(ValueKind::SCALAR, type), is_null_(is_null) {}
 
   bool is_null() const { return is_null_; }
 
@@ -57,6 +57,7 @@ class Array : public Value {
  public:
   virtual ~Array() {}
 
+  int64_t offset() const { return offset_; }
   int64_t length() const { return length_; }
 
   // There are two methods to obtain the data type.
@@ -158,6 +159,7 @@ template <typename TYPE>
 class PANDAS_EXPORT NumericArray : public Array {
  public:
   using T = typename TYPE::c_type;
+  using TypeClass = TYPE;
   using DataTypePtr = std::shared_ptr<TYPE>;
   using Array::Array;
 
