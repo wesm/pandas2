@@ -11,7 +11,6 @@
 #include "pandas/common.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
-#include "pandas/types/numeric.h"
 
 namespace pandas {
 

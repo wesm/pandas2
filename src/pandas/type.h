@@ -54,7 +54,6 @@ enum class TypeId : char {
 
 class DataType {
  public:
-
   explicit DataType(TypeId type) : type_(type) {}
 
   virtual ~DataType() {}
@@ -133,8 +132,7 @@ class PANDAS_EXPORT UInt8Type
   constexpr static const char* NAME = "uint8";
 };
 
-class PANDAS_EXPORT Int8Type
-    : public NumericType<Int8Type, std::int8_t, TypeId::INT8> {
+class PANDAS_EXPORT Int8Type : public NumericType<Int8Type, std::int8_t, TypeId::INT8> {
  public:
   constexpr static const char* NAME = "int8";
 };
@@ -175,14 +173,12 @@ class PANDAS_EXPORT Int64Type
   constexpr static const char* NAME = "int64";
 };
 
-class PANDAS_EXPORT FloatType
-    : public NumericType<FloatType, float, TypeId::FLOAT32> {
+class PANDAS_EXPORT FloatType : public NumericType<FloatType, float, TypeId::FLOAT32> {
  public:
   constexpr static const char* NAME = "float32";
 };
 
-class PANDAS_EXPORT DoubleType
-    : public NumericType<DoubleType, double, TypeId::FLOAT64> {
+class PANDAS_EXPORT DoubleType : public NumericType<DoubleType, double, TypeId::FLOAT64> {
  public:
   constexpr static const char* NAME = "float64";
 };
@@ -217,5 +213,20 @@ inline bool is_signed_integer(TypeId type_id) {
 inline bool is_unsigned_integer(TypeId type_id) {
   return type_id >= TypeId::UINT8 && type_id <= TypeId::UINT64;
 }
+
+std::shared_ptr<DataType> PANDAS_EXPORT null();
+std::shared_ptr<DataType> PANDAS_EXPORT boolean();
+std::shared_ptr<DataType> PANDAS_EXPORT int8();
+std::shared_ptr<DataType> PANDAS_EXPORT int16();
+std::shared_ptr<DataType> PANDAS_EXPORT int32();
+std::shared_ptr<DataType> PANDAS_EXPORT int64();
+std::shared_ptr<DataType> PANDAS_EXPORT uint8();
+std::shared_ptr<DataType> PANDAS_EXPORT uint16();
+std::shared_ptr<DataType> PANDAS_EXPORT uint32();
+std::shared_ptr<DataType> PANDAS_EXPORT uint64();
+std::shared_ptr<DataType> PANDAS_EXPORT float16();
+std::shared_ptr<DataType> PANDAS_EXPORT float32();
+std::shared_ptr<DataType> PANDAS_EXPORT float64();
+std::shared_ptr<DataType> PANDAS_EXPORT pyobject();
 
 }  // namespace pandas

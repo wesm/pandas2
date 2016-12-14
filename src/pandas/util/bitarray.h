@@ -16,16 +16,16 @@ class BitArray {
   BitArray() : length_(0), bits_(nullptr), count_(0) {}
   ~BitArray();
 
-  Status Init(size_t length);
+  void Init(int64_t length);
 
-  bool IsSet(size_t i) { return bits_[i / 8] & (1 << (i % 8)); }
+  bool IsSet(int64_t i) { return bits_[i / 8] & (1 << (i % 8)); }
 
-  void Set(size_t i) {
+  void Set(int64_t i) {
     if (!IsSet(i)) ++count_;
     bits_[i / 8] |= (1 << (i % 8));
   }
 
-  void Unset(size_t i) {
+  void Unset(int64_t i) {
     if (IsSet(i)) --count_;
     // clear bit
     bits_[i / 8] &= ~(1 << (i % 8));
@@ -33,28 +33,28 @@ class BitArray {
 
   // Set a range from start (inclusive) to end (not inclusive)
   // Bounds are not checked
-  // void SetRange(size_t start, size_t end) {
-  //   for (size_t i = start; i < end; ++i) {
+  // void SetRange(int64_t start, int64_t end) {
+  //   for (int64_t i = start; i < end; ++i) {
   //     Set(i);
   //   }
   // }
 
   // Unset a range from start (inclusive) to end (not inclusive)
   // Bounds are not checked
-  // void UnsetRange(size_t start, size_t end) {
-  //   for (size_t i = start; i < end; ++i) {
+  // void UnsetRange(int64_t start, int64_t end) {
+  //   for (int64_t i = start; i < end; ++i) {
   //     Unset(i);
   //   }
   // }
 
-  size_t set_count() { return count_; }
+  int64_t set_count() { return count_; }
 
-  size_t length() { return length_; }
+  int64_t length() { return length_; }
 
  private:
-  size_t length_;
+  int64_t length_;
   uint8_t* bits_;
-  size_t count_;
+  int64_t count_;
 };
 
 }  // namespace pandas

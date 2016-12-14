@@ -7,10 +7,8 @@
 #include "pandas/array.h"
 #include "pandas/common.h"
 #include "pandas/dispatch.h"
+#include "pandas/numpy_interop.h"
+#include "pandas/pytypes.h"
 #include "pandas/type.h"
-
-#include "pandas/types/boolean.h"
-#include "pandas/types/category.h"
-#include "pandas/types/numeric.h"
 
 #endif  // PANDAS_API_H

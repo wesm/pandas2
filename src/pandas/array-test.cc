@@ -15,7 +15,6 @@
 #include "pandas/meta/typelist.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
-#include "pandas/types/numeric.h"
 
 using std::string;
 
@@ -111,12 +110,12 @@ TEST_F(TestArrayView, EnsureMutable) {
 
   const Array* ap = view_.data().get();
 
-  ASSERT_OK(view_.EnsureMutable());
+  ASSERT_NO_THROW(view_.EnsureMutable());
   ASSERT_EQ(ap, view_.data().get());
 
   ArrayView view2 = view_;
 
-  ASSERT_OK(view_.EnsureMutable());
+  ASSERT_NO_THROW(view_.EnsureMutable());
 
   // The views now have their own distinct copies of the array
   ASSERT_NE(ap, view_.data().get());

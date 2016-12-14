@@ -47,8 +47,34 @@ constexpr const char* FloatType::NAME;
 constexpr const char* DoubleType::NAME;
 constexpr const char* BooleanType::NAME;
 
+std::string CategoryType::ToString() const {
+  std::stringstream s;
+  s << "category<" << category_type()->ToString() << ">";
+  return s.str();
+}
+
 std::shared_ptr<const DataType> CategoryType::category_type() const {
   return categories_->type();
 }
+
+#define TYPE_FACTORY(NAME, KLASS)                                        \
+  std::shared_ptr<DataType> NAME() {                                     \
+    static std::shared_ptr<DataType> result = std::make_shared<KLASS>(); \
+    return result;                                                       \
+  }
+
+TYPE_FACTORY(null, NullType);
+TYPE_FACTORY(boolean, BooleanType);
+TYPE_FACTORY(int8, Int8Type);
+TYPE_FACTORY(uint8, UInt8Type);
+TYPE_FACTORY(int16, Int16Type);
+TYPE_FACTORY(uint16, UInt16Type);
+TYPE_FACTORY(int32, Int32Type);
+TYPE_FACTORY(uint32, UInt32Type);
+TYPE_FACTORY(int64, Int64Type);
+TYPE_FACTORY(uint64, UInt64Type);
+TYPE_FACTORY(float32, FloatType);
+TYPE_FACTORY(float64, DoubleType);
+TYPE_FACTORY(pyobject, PyObjectType);
 
 }  // namespace pandas

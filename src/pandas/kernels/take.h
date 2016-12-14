@@ -34,8 +34,8 @@ class TakeOperation : public Operation {
 };
 
 template <typename VALUE_TYPE, typename INDEX_TYPE>
-inline void take(const VALUE_TYPE& values, const INDEX_TYPE& indices,
-    const VALUE_TYPE& out) {
+inline void take(
+    const VALUE_TYPE& values, const INDEX_TYPE& indices, const VALUE_TYPE& out) {
   const auto values_data = values.data();
   const auto indices_data = indices.data();
   auto out_data = out.mutable_data();
@@ -52,9 +52,7 @@ inline void take(const VALUE_TYPE& values, const INDEX_TYPE& indices,
       while (index < 0) {
         index += nvalues;
       }
-      if (BitUtil::GetBit(indices.valid, i)) {
-        out_data[i] = values_data[index];
-      }
+      if (BitUtil::GetBit(indices.valid, i)) { out_data[i] = values_data[index]; }
     }
   } else if (values.valid != nullptr) {
     for (int64_t i = 0; i < nindices; ++i) {

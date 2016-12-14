@@ -3,33 +3,34 @@
 
 #include "pandas/dispatch.h"
 
+#include <memory>
+
 #include "pandas/common.h"
 
 namespace pandas {
 
-#define MAKE_TYPE_CASE(NAME, CapName) \
+#define MAKE_TYPE_CASE(NAME, FACTORY) \
   case NAME:                          \
-    *out = new CapName##Type();       \
-    break;
+    return FACTORY();
 
-Status primitive_type_from_enum(TypeId tp_enum, DataType** out) {
+std::shared_ptr<DataType> primitive_type_from_enum(TypeId tp_enum) {
   switch (tp_enum) {
-    MAKE_TYPE_CASE(TypeId::INT8, Int8);
-    MAKE_TYPE_CASE(TypeId::INT16, Int16);
-    MAKE_TYPE_CASE(TypeId::INT32, Int32);
-    MAKE_TYPE_CASE(TypeId::INT64, Int64);
-    MAKE_TYPE_CASE(TypeId::UINT8, UInt8);
-    MAKE_TYPE_CASE(TypeId::UINT16, UInt16);
-    MAKE_TYPE_CASE(TypeId::UINT32, UInt32);
-    MAKE_TYPE_CASE(TypeId::UINT64, UInt64);
-    MAKE_TYPE_CASE(TypeId::FLOAT32, Float);
-    MAKE_TYPE_CASE(TypeId::FLOAT64, Double);
-    MAKE_TYPE_CASE(TypeId::BOOL, Boolean);
-    MAKE_TYPE_CASE(TypeId::PYOBJECT, PyObject);
+    MAKE_TYPE_CASE(TypeId::INT8, int8);
+    MAKE_TYPE_CASE(TypeId::INT16, int16);
+    MAKE_TYPE_CASE(TypeId::INT32, int32);
+    MAKE_TYPE_CASE(TypeId::INT64, int64);
+    MAKE_TYPE_CASE(TypeId::UINT8, uint8);
+    MAKE_TYPE_CASE(TypeId::UINT16, uint16);
+    MAKE_TYPE_CASE(TypeId::UINT32, uint32);
+    MAKE_TYPE_CASE(TypeId::UINT64, uint64);
+    MAKE_TYPE_CASE(TypeId::FLOAT32, float32);
+    MAKE_TYPE_CASE(TypeId::FLOAT64, float64);
+    MAKE_TYPE_CASE(TypeId::BOOL, boolean);
+    MAKE_TYPE_CASE(TypeId::PYOBJECT, pyobject);
     default:
-      return Status::NotImplemented("Not a primitive type");
+      break;
   }
-  return Status::OK();
+  throw NotImplementedError("Not implemented");
 }
 
 }  // namespace pandas

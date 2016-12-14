@@ -662,11 +662,6 @@ set(PANDAS_SRCS
   src/pandas/numpy_interop.cc
   src/pandas/pytypes.cc
   src/pandas/type.cc
-
-  src/pandas/types/common.cc
-  src/pandas/types/category.cc
-  src/pandas/types/numeric.cc
-  src/pandas/types/pyobject.cc
 )
 
 add_library(pandas SHARED

@@ -39,4 +39,20 @@ using UInt32Array = IntegerArray<UInt32Type>;
 
 using Int64Array = IntegerArray<Int64Type>;
 using UInt64Array = IntegerArray<UInt64Type>;
+
+class Scalar;
+
+template <typename TYPE>
+class NumericScalar;
+
+using FloatScalar = NumericScalar<FloatType>;
+using DoubleScalar = NumericScalar<DoubleType>;
+using Int8Scalar = NumericScalar<Int8Type>;
+using UInt8Scalar = NumericScalar<UInt8Type>;
+using Int16Scalar = NumericScalar<Int16Type>;
+using UInt16Scalar = NumericScalar<UInt16Type>;
+using Int32Scalar = NumericScalar<Int32Type>;
+using UInt32Scalar = NumericScalar<UInt32Type>;
+using Int64Scalar = NumericScalar<Int64Type>;
+using UInt64Scalar = NumericScalar<UInt64Type>;
 }

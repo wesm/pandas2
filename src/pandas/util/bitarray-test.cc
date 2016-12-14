@@ -13,7 +13,7 @@ TEST(BitArrayTests, TestBasics) {
   BitArray arr;
   size_t length = 100;
 
-  ASSERT_OK(arr.Init(length));
+  ASSERT_NO_THROW(arr.Init(length));
 
   ASSERT_EQ(0, arr.set_count());
   arr.Set(5);

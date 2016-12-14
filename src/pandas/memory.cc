@@ -12,9 +12,9 @@
 #include "pandas/common.h"
 #include "pandas/util/logging.h"
 
-namespace pandas {
+using Status = ::arrow::Status;
 
-namespace {
+namespace pandas {
 
 Status AllocateAligned(int64_t size, uint8_t** out) {
   // TODO(emkornfield) find something compatible with windows
@@ -33,7 +33,6 @@ Status AllocateAligned(int64_t size, uint8_t** out) {
   }
   return Status::OK();
 }
-}  // namespace
 
 Status PandasMemoryPool::Allocate(int64_t size, uint8_t** out) {
   std::lock_guard<std::mutex> guard(pool_lock_);

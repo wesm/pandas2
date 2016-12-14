@@ -18,52 +18,10 @@ cdef extern from "Python.h":
 import pandas.internals.config
 import numpy as np
 
-UINT8 = lp.TypeId_UINT8
-UINT16 = lp.TypeId_UINT16
-UINT32 = lp.TypeId_UINT32
-UINT64 = lp.TypeId_UINT64
-INT8 = lp.TypeId_INT8
-INT16 = lp.TypeId_INT16
-INT32 = lp.TypeId_INT32
-INT64 = lp.TypeId_INT64
-BOOL = lp.TypeId_BOOL
-FLOAT = lp.TypeId_FLOAT
-DOUBLE = lp.TypeId_DOUBLE
-PYOBJECT = lp.TypeId_PYOBJECT
-CATEGORY = lp.TypeId_CATEGORY
-TIMESTAMP = lp.TypeId_TIMESTAMP
-TIMESTAMP_TZ = lp.TypeId_TIMESTAMP_TZ
-
-
-class CPandasException(Exception):
-    pass
-
-
-class CPandasBadStatus(CPandasException):
-    """
-    libpandas operation returned an error Status
-    """
-    pass
-
-
-class CPandasNotImplemented(CPandasBadStatus):
-    pass
-
-
-cdef check_status(const lp.Status& status):
-    if status.ok():
-        return
-
-    message = status.ToString()
-
-    if status.IsNotImplemented():
-        raise CPandasNotImplemented(message)
-    else:
-        raise CPandasBadStatus(message)
-
 
 cdef class Scalar:
-    cdef readonly:
+
+    cdef:
         lp.TypeId type
 
 
@@ -82,36 +40,52 @@ def isnull(obj):
     return lp.is_na(obj)
 
 
-cdef dict _primitive_type_aliases = {
-    'u1': UINT8,
-    'u2': UINT16,
-    'u4': UINT32,
-    'u8': UINT64,
-    'uint8': UINT8,
-    'uint16': UINT16,
-    'uint32': UINT32,
-    'uint64': UINT64,
+# UINT8 = lp.TypeId_UINT8
+# UINT16 = lp.TypeId_UINT16
+# UINT32 = lp.TypeId_UINT32
+# UINT64 = lp.TypeId_UINT64
+# INT8 = lp.TypeId_INT8
+# INT16 = lp.TypeId_INT16
+# INT32 = lp.TypeId_INT32
+# INT64 = lp.TypeId_INT64
+# BOOL = lp.TypeId_BOOL
+# FLOAT = lp.TypeId_FLOAT
+# DOUBLE = lp.TypeId_DOUBLE
+# PYOBJECT = lp.TypeId_PYOBJECT
+# CATEGORY = lp.TypeId_CATEGORY
+# TIMESTAMP = lp.TypeId_TIMESTAMP
+# TIMESTAMP_TZ = lp.TypeId_TIMESTAMP_TZ
 
-    'i1': INT8,
-    'i2': INT16,
-    'i4': INT32,
-    'i8': INT64,
-    'int8': INT8,
-    'int16': INT16,
-    'int32': INT32,
-    'int64': INT64,
+# cdef dict _primitive_type_aliases = {
+#     'u1': UINT8,
+#     'u2': UINT16,
+#     'u4': UINT32,
+#     'u8': UINT64,
+#     'uint8': UINT8,
+#     'uint16': UINT16,
+#     'uint32': UINT32,
+#     'uint64': UINT64,
 
-    'f4': FLOAT,
-    'f8': DOUBLE,
-    'float32': FLOAT,
-    'float64': DOUBLE,
+#     'i1': INT8,
+#     'i2': INT16,
+#     'i4': INT32,
+#     'i8': INT64,
+#     'int8': INT8,
+#     'int16': INT16,
+#     'int32': INT32,
+#     'int64': INT64,
 
-    'b1': BOOL,
-    'bool': BOOL,
+#     'f4': FLOAT,
+#     'f8': DOUBLE,
+#     'float32': FLOAT,
+#     'float64': DOUBLE,
 
-    'O8': PYOBJECT,
-    'object': PYOBJECT,
-}
+#     'b1': BOOL,
+#     'bool': BOOL,
+
+#     'O8': PYOBJECT,
+#     'object': PYOBJECT,
+# }
 
 
 def wrap_numpy_array(ndarray arr):
@@ -120,9 +94,9 @@ def wrap_numpy_array(ndarray arr):
 
 cdef class PandasType:
     cdef:
-        lp.TypePtr type
+        shared_ptr[DataType] type
 
-    cdef init(self, const lp.TypePtr& type):
+    cdef init(self, const shared_ptr[DataType]& type):
         self.type = type
 
     def __repr__(self):
@@ -137,14 +111,12 @@ cdef class PandasType:
         return self.type.get().Equals(deref(other.type.get()))
 
 
-def primitive_type(TypeId tp_enum):
+cdef primitive_type(lp.TypeId tp_enum):
     cdef:
-        lp.TypePtr sp_type
-        lp.DataType* type
+        shared_ptr[DataType] type_
 
-    check_status(lp.primitive_type_from_enum(tp_enum, &type))
-    sp_type.reset(type)
-    return wrap_type(sp_type)
+    type_ = lp.primitive_type_from_enum(tp_enum)
+    return wrap_type(type_)
 
 
 cdef class Category(PandasType):
@@ -161,7 +133,7 @@ def category_type(categories):
 
 cdef class Array:
     cdef:
-        lp.ArrayPtr arr
+        shared_ptr[CArray] arr
         CArray* ap
 
     def __cinit__(self):
@@ -206,10 +178,10 @@ cdef class Array:
 
         return self._getitem(i)
 
-    cdef inline _getitem(self, size_t i):
+    cdef inline _getitem(self, int i):
         if i >= self.ap.length():
             raise IndexError('Out of bounds: %d' % i)
-        return self.ap.GetItem(i)
+        return None # self.ap.GetItem(i)
 
     def __setitem__(self, i, val):
         cdef:
@@ -223,10 +195,10 @@ cdef class Array:
 
         self._setitem(i, val)
 
-    cdef inline _setitem(self, size_t i, object val):
+    cdef inline _setitem(self, int i, object val):
         if i >= self.ap.length():
             raise IndexError('Out of bounds: %d' % i)
-        self.ap.SetItem(i, val)
+        # self.ap.SetItem(i, val)
 
     def slice(self, start, end):
         pass
@@ -275,7 +247,7 @@ cdef Array wrap_array(const lp.ArrayPtr& arr):
     return result
 
 
-cdef PandasType wrap_type(const lp.TypePtr& sp_type):
+cdef PandasType wrap_type(const shared_ptr[DataType]& sp_type):
     cdef:
         const lp.DataType* type = sp_type.get()
         PandasType result
@@ -290,13 +262,10 @@ cdef PandasType wrap_type(const lp.TypePtr& sp_type):
     return result
 
 
-cpdef PandasType convert_numpy_dtype(cnp.dtype dtype):
-    cdef lp.TypeId pandas_typenum
-    check_status(lp.numpy_type_num_to_pandas(dtype.type_num,
-                                             &pandas_typenum))
-
-    return primitive_type(pandas_typenum)
-
+# cpdef PandasType convert_numpy_dtype(cnp.dtype dtype):
+#     cdef lp.TypeId pandas_typenum
+#     pandas_typenum = lp.numpy_type_num_to_pandas(dtype.type_num)
+#     return primitive_type(pandas_typenum)
 
 def to_array(values):
     if isinstance(values, np.ndarray):
@@ -306,11 +275,6 @@ def to_array(values):
 
 
 cdef numpy_to_pandas_array(ndarray arr):
-    cdef:
-        Array result
-        CArray* array_obj
-        lp.ArrayPtr sp_array
-
-    check_status(lp.array_from_numpy(<PyObject*> arr, &array_obj))
-    sp_array.reset(array_obj)
-    return wrap_array(sp_array)
+    cdef shared_ptr[CArray] array
+    array = lp.CreateArrayFromNumPy(arr)
+    return wrap_array(array)

@@ -7,20 +7,19 @@
 
 #include <memory>
 
+#include "pandas/array.h"
 #include "pandas/common.h"
 #include "pandas/memory.h"
+#include "pandas/pytypes.h"
 #include "pandas/type.h"
-#include "pandas/types/numeric.h"
-#include "pandas/types/pyobject.h"
 
 namespace pandas {
 
 #define TYPE_MAP_CASE(NP_NAME, PD_CAP_TYPE) \
   case NPY_##NP_NAME:                       \
-    *type = PD_CAP_TYPE##Type::SINGLETON;   \
-    break;
+    return PD_CAP_TYPE##Type::SINGLETON;
 
-Status PandasTypeFromNumPy(PyArray_Descr* npy_type, std::shared_ptr<DataType>* type) {
+std::shared_ptr<DataType> PandasTypeFromNumPy(PyArray_Descr* npy_type) {
   switch (npy_type->type_num) {
     TYPE_MAP_CASE(INT8, Int8);
     TYPE_MAP_CASE(INT16, Int16);
@@ -35,9 +34,9 @@ Status PandasTypeFromNumPy(PyArray_Descr* npy_type, std::shared_ptr<DataType>* t
     TYPE_MAP_CASE(BOOL, Boolean);
     // TYPE_MAP_CASE(OBJECT, PythonObject);
     default:
-      return Status::NotImplemented("unsupported numpy type");
+      break;
   }
-  return Status::OK();
+  throw NotImplementedError("unsupported numpy type");
 }
 
 template <typename T>
@@ -65,10 +64,10 @@ void CopyStrided<PyObject*>(
 // NumPy conversion (zero-copy when possible)
 
 template <int NPY_TYPE>
-inline Status WrapNumPyArray(PyArrayObject* arr, std::shared_ptr<Buffer>* out) {
+inline std::shared_ptr<Buffer> WrapNumPyArray(PyArrayObject* arr) {
   using T = typename NumPyTraits<NPY_TYPE>::T;
 
-  if (PyArray_NDIM(arr) != 1) { return Status::Invalid("Only support 1D NumPy arrays "); }
+  if (PyArray_NDIM(arr) != 1) { throw ValueError("Only support 1D NumPy arrays"); }
 
   const int64_t stride = PyArray_STRIDES(arr)[0];
   const int64_t length = PyArray_SIZE(arr);
@@ -77,16 +76,15 @@ inline Status WrapNumPyArray(PyArrayObject* arr, std::shared_ptr<Buffer>* out) {
 
   if (PyArray_DTYPE(arr)->elsize == stride) {
     // It is contiguous, zero copy possible
-    *out = std::make_shared<NumPyBuffer>(arr);
+    return std::make_shared<NumPyBuffer>(arr);
   } else {
     // Strided, must copy into new contiguous memory
     auto new_buffer = std::make_shared<PoolBuffer>(memory_pool());
-    RETURN_NOT_OK(new_buffer->Resize(sizeof(T) * length));
+    PANDAS_THROW_NOT_OK(new_buffer->Resize(sizeof(T) * length));
     CopyStrided(reinterpret_cast<T*>(PyArray_DATA(arr)), length, stride_elements,
         reinterpret_cast<T*>(new_buffer->mutable_data()));
-    *out = new_buffer;
+    return new_buffer;
   }
-  return Status::OK();
 }
 
 // TODO(wesm): Do we want to implement BooleanArray as bits?
@@ -125,23 +123,19 @@ inline Status WrapNumPyArray(PyArrayObject* arr, std::shared_ptr<Buffer>* out) {
 // }
 
 template <int NPY_TYPE>
-inline Status ConvertNumPyArray(PyArrayObject* arr, std::shared_ptr<Array>* out) {
+inline std::shared_ptr<Array> ConvertNumPyArray(PyArrayObject* arr) {
   using ArrayType = typename NumPyTraits<NPY_TYPE>::ArrayType;
 
   // Check if contiguous
-  std::shared_ptr<Buffer> data;
-  RETURN_NOT_OK(WrapNumPyArray<NPY_TYPE>(arr, &data));
-
-  *out = std::make_shared<ArrayType>(PyArray_SIZE(arr), data);
-  return Status::OK();
+  std::shared_ptr<Buffer> data = WrapNumPyArray<NPY_TYPE>(arr);
+  return std::make_shared<ArrayType>(PyArray_SIZE(arr), data);
 }
 
-#define NUMPY_CONVERTER_CASE(NP_NAME)                          \
-  case NPY_##NP_NAME:                                          \
-    RETURN_NOT_OK(ConvertNumPyArray<NPY_##NP_NAME>(arr, out)); \
-    break;
+#define NUMPY_CONVERTER_CASE(NP_NAME) \
+  case NPY_##NP_NAME:                 \
+    return ConvertNumPyArray<NPY_##NP_NAME>(arr);
 
-Status CreateArrayFromNumPy(PyArrayObject* arr, std::shared_ptr<Array>* out) {
+std::shared_ptr<Array> CreateArrayFromNumPy(PyArrayObject* arr) {
   PyArray_Descr* dtype = PyArray_DTYPE(arr);
   switch (dtype->type_num) {
     NUMPY_CONVERTER_CASE(INT8);
@@ -157,16 +151,16 @@ Status CreateArrayFromNumPy(PyArrayObject* arr, std::shared_ptr<Array>* out) {
     NUMPY_CONVERTER_CASE(BOOL);
     NUMPY_CONVERTER_CASE(OBJECT);
     default:
-      return Status::NotImplemented("unsupported numpy type");
+      break;
   }
-  return Status::OK();
+  throw NotImplementedError("unsupported numpy type");
 }
 
 // Convert a NumPy array to a pandas::Array with appropriate missing values set
 // according to the passed uint8 dtype mask array
-Status CreateArrayFromMaskedNumPy(
-    PyArrayObject* arr, PyArrayObject* mask, std::shared_ptr<Array>* out) {
-  return Status::NotImplemented("NYI");
+std::shared_ptr<Array> CreateArrayFromMaskedNumPy(
+    PyArrayObject* arr, PyArrayObject* mask) {
+  throw NotImplementedError("NYI");
 }
 
 // ----------------------------------------------------------------------

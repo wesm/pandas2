@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include "pandas/common.h"
+#include <memory>
+
 #include "pandas/type.h"
 
 namespace pandas {
 
-Status primitive_type_from_enum(TypeId tp_enum, DataType** out);
+std::shared_ptr<DataType> primitive_type_from_enum(TypeId tp_enum);
 
 }  // namespace pandas

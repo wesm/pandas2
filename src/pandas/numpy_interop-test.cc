@@ -14,22 +14,20 @@
 #include "pandas/pytypes.h"
 #include "pandas/test-util.h"
 #include "pandas/type.h"
-#include "pandas/types/numeric.h"
 
 namespace pandas {
 
-Status AllocateNDArray1D(int type, int64_t length, PyArrayObject** out) {
+PyArrayObject* AllocateNDArray1D(int type, int64_t length) {
   npy_intp dims[1] = {length};
-  *out = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(1, dims, type));
-  RETURN_IF_PYERROR();
-  return Status::OK();
+  PyArrayObject* out = reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(1, dims, type));
+  THROW_IF_PYERROR();
+  return out;
 }
 
-Status ContiguousFromNumPy(int type, int64_t length, std::shared_ptr<Array>* out) {
-  PyArrayObject* np_arr;
-  RETURN_NOT_OK(AllocateNDArray1D(type, length, &np_arr));
+std::shared_ptr<Array> ContiguousFromNumPy(int type, int64_t length) {
+  PyArrayObject* np_arr = AllocateNDArray1D(type, length);
   OwnedRef ref(PyObject * (np_arr));
-  return CreateArrayFromNumPy(np_arr, out);
+  return CreateArrayFromNumPy(np_arr);
 }
 
 void CheckNDArray(int npy_type_num, TypeId ex_type) {}
@@ -38,15 +36,15 @@ static constexpr int kLength = 10;
 static constexpr int kNpyTypes[10] = {NPY_UINT8, NPY_INT8, NPY_UINT16, NPY_INT16,
     NPY_UINT32, NPY_INT32, NPY_UINT64, NPY_INT64, NPY_FLOAT, NPY_DOUBLE};
 
-static constexpr TypeId kPandasTypes[10] = {TypeId::UINT8, TypeId::INT8,
-    TypeId::UINT16, TypeId::INT16, TypeId::UINT32, TypeId::INT32,
-    TypeId::UINT64, TypeId::INT64, TypeId::FLOAT32, TypeId::FLOAT64};
+static constexpr TypeId kPandasTypes[10] = {TypeId::UINT8, TypeId::INT8, TypeId::UINT16,
+    TypeId::INT16, TypeId::UINT32, TypeId::INT32, TypeId::UINT64, TypeId::INT64,
+    TypeId::FLOAT32, TypeId::FLOAT64};
 
 TEST(TestNumPyInterop, TestMetadataBasics) {
   const int length = 50;
   std::shared_ptr<Array> out;
   for (size_t i = 0; i < kLength; ++i) {
-    ASSERT_OK(ContiguousFromNumPy(kNpyTypes[i], length, &out));
+    ASSERT_NO_THROW(out = ContiguousFromNumPy(kNpyTypes[i], length));
     ASSERT_EQ(kPandasTypes[i], out->type_id());
   }
 }
@@ -66,7 +64,7 @@ TEST(TestNumPyInterop, ZeroCopyInit) {
   // These are all zero copy
   for (size_t i = 0; i < kLength; ++i) {
     int npy_num = kNpyTypes[i];
-    ASSERT_OK(ContiguousFromNumPy(npy_num, length, &out));
+    ASSERT_NO_THROW(out = ContiguousFromNumPy(npy_num, length));
     ASSERT_EQ(0, memory_pool()->bytes_allocated());
   }
 }
@@ -74,7 +72,7 @@ TEST(TestNumPyInterop, ZeroCopyInit) {
 // Strided tests
 
 void AssertNoPythonError() {
-  if (PyErr_Occurred()) { ASSERT_OK(GetPythonError()); }
+  ASSERT_NO_THROW(THROW_IF_PYERROR());
 }
 
 void AssertMemorySize(int64_t expected, int64_t actual) {
@@ -100,8 +98,7 @@ void CheckStridedNumbers() {
 
   PyArrayObject* np_arr = reinterpret_cast<PyArrayObject*>(ref.get());
 
-  std::shared_ptr<Array> out;
-  ASSERT_OK(CreateArrayFromNumPy(np_arr, &out));
+  std::shared_ptr<Array> out = CreateArrayFromNumPy(np_arr);
 
   // Check that the values were copied over
   const auto ap = static_cast<const ArrayType*>(out.get());

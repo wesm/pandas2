@@ -20,7 +20,7 @@ class PandasMemoryPool : public MemoryPool {
   PandasMemoryPool() : bytes_allocated_(0) {}
   virtual ~PandasMemoryPool();
 
-  Status Allocate(int64_t size, uint8_t** out) override;
+  ::arrow::Status Allocate(int64_t size, uint8_t** out) override;
   void Free(uint8_t* buffer, int64_t size) override;
   int64_t bytes_allocated() const override;
 

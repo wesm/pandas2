@@ -31,9 +31,9 @@
 
 #include "pandas/array.h"
 #include "pandas/common.h"
+#include "pandas/pytypes.h"
 #include "pandas/type.h"
-#include "pandas/types/numeric.h"
-#include "pandas/types/pyobject.h"
+#include "pandas/visibility.h"
 
 namespace pandas {
 
@@ -46,12 +46,12 @@ inline int import_numpy() {
   return 0;
 }
 
-Status PandasTypeFromNumPy(PyArray_Descr* dtype, std::shared_ptr<DataType>* type);
+std::shared_ptr<DataType> PANDAS_EXPORT PandasTypeFromNumPy(PyArray_Descr* dtype);
 
 // These are zero-copy if the data is contiguous (not strided)
-Status CreateArrayFromNumPy(PyArrayObject* arr, std::shared_ptr<Array>* out);
-Status CreateArrayFromMaskedNumPy(
-    PyArrayObject* arr, PyArrayObject* mask, std::shared_ptr<Array>* out);
+std::shared_ptr<Array> PANDAS_EXPORT CreateArrayFromNumPy(PyArrayObject* arr);
+std::shared_ptr<Array> PANDAS_EXPORT CreateArrayFromMaskedNumPy(
+    PyArrayObject* arr, PyArrayObject* mask);
 
 // Container for strided (but contiguous) data contained in a NumPy array
 class NumPyBuffer : public MutableBuffer {

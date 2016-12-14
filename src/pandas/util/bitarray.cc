@@ -13,17 +13,14 @@ BitArray::~BitArray() {
   delete[] bits_;
 }
 
-Status BitArray::Init(size_t length) {
-  size_t bufsize = BitUtil::CeilByte(length / 8);
+void BitArray::Init(int64_t length) {
+  int64_t bufsize = BitUtil::CeilByte(length / 8);
   try {
     bits_ = new uint8_t[bufsize];
     memset(bits_, 0, bufsize);
-  } catch (const std::bad_alloc& e) {
-    return Status::OutOfMemory("BitArray buffer failed");
-  }
+  } catch (const std::bad_alloc& e) { throw OutOfMemory("BitArray allocation failed"); }
   length_ = length;
   count_ = 0;
-  return Status::OK();
 }
 
 }  // namespace pandas

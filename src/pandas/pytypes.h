@@ -6,6 +6,7 @@
 
 #include <Python.h>
 
+#include "pandas/array.h"
 #include "pandas/common.h"
 
 namespace pandas {
@@ -78,10 +79,33 @@ class PyAcquireGIL {
 };
 
 // TODO(wesm): We can just let errors pass through. To be explored later
-Status GetPythonError();
+std::string GetPythonError();
 
-#define RETURN_IF_PYERROR() \
-  if (PyErr_Occurred()) { return GetPythonError(); }
+#define THROW_IF_PYERROR() \
+  if (PyErr_Occurred()) { throw PandasException(GetPythonError()); }
+
+class PANDAS_EXPORT PyObjectArray : public Array {
+ public:
+  using T = PyObject*;
+  PyObjectArray(int64_t length, const std::shared_ptr<Buffer>& data,
+      const std::shared_ptr<Buffer>& valid_bits = nullptr);
+
+  std::shared_ptr<Array> Copy(int64_t offset, int64_t length) const override;
+
+  int64_t GetNullCount() override;
+
+  bool owns_data() const override;
+
+  PyObject** data() const;
+  PyObject** mutable_data() const;
+
+  const PyObjectType& type_reference() const override;
+
+ protected:
+  std::shared_ptr<PyObjectType> type_;
+  std::shared_ptr<Buffer> data_;
+  std::shared_ptr<Buffer> valid_bits_;
+};
 
 }  // namespace pandas
 
